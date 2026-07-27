@@ -1,0 +1,71 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+
+}
+
+//enum db
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum EvidenceType {
+  PHOTO
+  PDF
+  AUDIO
+  DOCUMENT
+}
+
+//tables schemas
+
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  password  String
+  createdAt DateTime  @default(now())
+  role      Role      @default(USER)
+  updatedAt DateTime  @updatedAt
+  username  String?
+  dossier   Dossier[]
+}
+
+model Dossier {
+  id          String     @id @default(uuid())
+  code        String     @unique
+  title       String
+  description String
+  status      String     @default("Open")
+  evidences   Evidence[]
+  timeline    Timeline[]
+  author      String
+  user        User       @relation(fields: [author], references: [id])
+}
+
+model Evidence {
+  id        String       @id @default(uuid())
+  dossierId String
+  dossier   Dossier      @relation(fields: [dossierId], references: [code])
+  type      EvidenceType @default(PHOTO)
+  fileUrl   String
+  notes     String?
+}
+
+model Timeline {
+  id          String   @id @default(uuid())
+  date        DateTime
+  title       String
+  description String   @db.VarChar(255)
+  dossierId   String
+  dossier     Dossier  @relation(fields: [dossierId], references: [code], onDelete: Cascade)
+}
