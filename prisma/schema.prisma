@@ -10,7 +10,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-
 }
 
 //enum db
@@ -41,15 +40,17 @@ model User {
 }
 
 model Dossier {
-  id          String     @id @default(uuid())
-  code        String     @unique
-  title       String
-  description String
-  status      String     @default("Open")
-  evidences   Evidence[]
-  timeline    Timeline[]
-  author      String
-  user        User       @relation(fields: [author], references: [id])
+  id             String     @id @default(uuid())
+  code           String     @unique
+  title          String
+  title_en       String?
+  description    String
+  description_en String?
+  status         String     @default("Open")
+  evidences      Evidence[]
+  timeline       Timeline[]
+  author         String
+  user           User       @relation(fields: [author], references: [id])
 }
 
 model Evidence {
@@ -58,14 +59,17 @@ model Evidence {
   dossier   Dossier      @relation(fields: [dossierId], references: [code])
   type      EvidenceType @default(PHOTO)
   fileUrl   String
-  notes     String?
+  notes     String
+  notes_en  String?
 }
 
 model Timeline {
-  id          String   @id @default(uuid())
-  date        DateTime
-  title       String
-  description String   @db.VarChar(255)
-  dossierId   String
-  dossier     Dossier  @relation(fields: [dossierId], references: [code], onDelete: Cascade)
+  id             String   @id @default(uuid())
+  date           DateTime
+  title          String
+  title_en       String?
+  description    String   @db.VarChar(255)
+  description_en String?  @db.VarChar(255)
+  dossierId      String
+  dossier        Dossier  @relation(fields: [dossierId], references: [code], onDelete: Cascade)
 }
