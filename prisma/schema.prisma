@@ -26,17 +26,24 @@ enum EvidenceType {
   DOCUMENT
 }
 
+enum EvidenceStatus {
+  PENDIG
+  REJECTED
+  ACCEPTED
+}
+
 //tables schemas
 
 model User {
-  id        String    @id @default(uuid())
-  email     String    @unique
+  id        String     @id @default(uuid())
+  email     String     @unique
   password  String
-  createdAt DateTime  @default(now())
-  role      Role      @default(USER)
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime   @default(now())
+  role      Role       @default(USER)
+  updatedAt DateTime   @updatedAt
   username  String?
   dossier   Dossier[]
+  evidence  Evidence[]
 }
 
 model Dossier {
@@ -54,13 +61,16 @@ model Dossier {
 }
 
 model Evidence {
-  id        String       @id @default(uuid())
+  id        String         @id @default(uuid())
   dossierId String
-  dossier   Dossier      @relation(fields: [dossierId], references: [code])
-  type      EvidenceType @default(PHOTO)
+  dossier   Dossier        @relation(fields: [dossierId], references: [code])
+  type      EvidenceType   @default(PHOTO)
   fileUrl   String
   notes     String
   notes_en  String?
+  status    EvidenceStatus @default(PENDIG)
+  author    String
+  user      User           @relation(fields: [author], references: [id])
 }
 
 model Timeline {
