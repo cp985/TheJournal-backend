@@ -99,10 +99,9 @@ export const dossiersGet = async (
         message: "No dossiers found",
       });
     }
-    res.status(200).json({
-      message: "Hello World from the journal dossiersList!",
-      dossiersList,
-    });
+    res.status(200).json(
+    [ dossiersList]
+    );
   } catch (e) {
     console.log(e);
     next(e);
