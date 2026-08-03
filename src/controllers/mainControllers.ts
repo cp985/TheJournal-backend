@@ -9,6 +9,7 @@ export const homeGet = (req: Request, res: Response) => {
   });
 };
 
+// users
 export const usersGet = async (
   req: Request,
   res: Response,
@@ -65,6 +66,50 @@ export const usersPost = async (
     next(e);
   }
 };
+
+export const dossiersGet = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const dossiersList = await prisma.dossier.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+          },
+        },
+        evidences: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                username: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    console.log(dossiersList);
+    if (!dossiersList || dossiersList.length === 0) {
+      return res.status(404).json({
+        message: "No dossiers found",
+      });
+    }
+    res.status(200).json({
+      message: "Hello World from the journal dossiersList!",
+      dossiersList,
+    });
+  } catch (e) {
+    console.log(e);
+    next(e);
+  }
+};
+
+// Dossiers
 
 export const dossiersPost = async (
   req: Request,
