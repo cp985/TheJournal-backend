@@ -100,7 +100,7 @@ export const dossiersGet = async (
       });
     }
     res.status(200).json(
-    [ dossiersList]
+    dossiersList
     );
   } catch (e) {
     console.log(e);
