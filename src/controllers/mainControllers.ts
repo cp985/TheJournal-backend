@@ -126,6 +126,7 @@ export const dossiersPost = async (
     const dossier = await prisma.dossier.create({
       data: {
         code: newDossier.code,
+        coverUrl: newDossier.coverUrl,
         title: newDossier.title,
         title_en: newDossier.tite_en,
         description: newDossier.description,
