@@ -62,3 +62,39 @@ export const usersPost = async (req : Request, res : Response, next : NextFuncti
     }
 
 }
+
+
+export const dossiersPost = async (req : Request, res : Response, next : NextFunction) => {
+    try{
+        const newDossier= req.body;
+
+            if(!newDossier) {
+        return res.status(404).json({
+            message: "No dossier created"
+        });
+    }
+        const dossier = await prisma.dossier.create({
+            data: {
+                code: newDossier.code,
+                title: newDossier.title,
+                title_en: newDossier.tite_en,
+                description: newDossier.description,
+                description_en: newDossier.description_en,
+                author: newDossier.author
+            }
+        });
+        console.log(dossier);
+
+    console.log(newDossier);
+
+    res.status(200).json({
+        message: "Hello World from the journal newDossier!",
+        newDossier
+    });
+    }
+    catch(e) {
+        console.log(e);
+        next(e);
+    }
+
+}
