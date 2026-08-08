@@ -149,7 +149,7 @@ export const dossiersGet = async (
 ) => {
   try {
 
-    const dossierLimit = req.params.limit ? Number(req.params.limit)  : undefined;
+    const dossierLimit = req.query.limit ? Number(req.query.limit)  : undefined;
   
     const dossiersList = await prisma.dossier.findMany({
       include: {
