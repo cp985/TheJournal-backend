@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -12,7 +7,56 @@ datasource db {
   provider = "postgresql"
 }
 
-//enum db
+model User {
+  id        String     @id @default(uuid())
+  email     String     @unique
+  password  String
+  createdAt DateTime   @default(now())
+  role      Role       @default(USER)
+  updatedAt DateTime   @updatedAt
+  username  String     @unique
+  dossier   Dossier[]
+  evidence  Evidence[]
+}
+
+model Dossier {
+  id             String     @id @default(dbgenerated("gen_random_uuid()"))
+  code           String     @unique
+  title          String
+  description    String
+  status         String     @default("Open")
+  author         String
+  description_en String?
+  title_en       String?
+  coverUrl       String
+  user           User       @relation(fields: [author], references: [id])
+  evidences      Evidence[]
+  timeline       Timeline[]
+}
+
+model Evidence {
+  id        String         @id @default(dbgenerated("gen_random_uuid()"))
+  dossierId String
+  type      EvidenceType   @default(PHOTO)
+  fileUrl   String
+  notes     String
+  author    String
+  notes_en  String?
+  status    EvidenceStatus @default(PENDING)
+  user      User           @relation(fields: [author], references: [id])
+  dossier   Dossier        @relation(fields: [dossierId], references: [code])
+}
+
+model Timeline {
+  id             String   @id @default(uuid())
+  date           DateTime
+  title          String
+  description    String   @db.VarChar(255)
+  dossierId      String
+  description_en String?  @db.VarChar(255)
+  title_en       String?
+  dossier        Dossier  @relation(fields: [dossierId], references: [code], onDelete: Cascade)
+}
 
 enum Role {
   USER
@@ -30,57 +74,4 @@ enum EvidenceStatus {
   PENDING
   REJECTED
   ACCEPTED
-}
-
-//tables schemas
-
-model User {
-  id        String     @id @default(uuid())
-  email     String     @unique
-  password  String
-  createdAt DateTime   @default(now())
-  role      Role       @default(USER)
-  updatedAt DateTime   @updatedAt
-  username  String?
-  dossier   Dossier[]
-  evidence  Evidence[]
-}
-
-model Dossier {
-  id             String     @id @default(uuid())
-  code           String     @unique
-  coverUrl       String
-  title          String
-  title_en       String?
-  description    String
-  description_en String?
-  status         String     @default("Open")
-  evidences      Evidence[]
-  timeline       Timeline[]
-  author         String
-  user           User       @relation(fields: [author], references: [id])
-}
-
-model Evidence {
-  id        String         @id @default(uuid())
-  dossierId String
-  dossier   Dossier        @relation(fields: [dossierId], references: [code])
-  type      EvidenceType   @default(PHOTO)
-  fileUrl   String
-  notes     String
-  notes_en  String?
-  status    EvidenceStatus @default(PENDING)
-  author    String
-  user      User           @relation(fields: [author], references: [id])
-}
-
-model Timeline {
-  id             String   @id @default(uuid())
-  date           DateTime
-  title          String
-  title_en       String?
-  description    String   @db.VarChar(255)
-  description_en String?  @db.VarChar(255)
-  dossierId      String
-  dossier        Dossier  @relation(fields: [dossierId], references: [code], onDelete: Cascade)
 }

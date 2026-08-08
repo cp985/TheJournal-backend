@@ -1,6 +1,7 @@
 import { type Request, type Response, type NextFunction } from "express";
 import { prisma } from "../db/client.js";
 import dotenv from "dotenv";
+import bcrypt from "bcrypt";
 dotenv.config();
 
 export const homeGet = (req: Request, res: Response) => {
@@ -9,7 +10,7 @@ export const homeGet = (req: Request, res: Response) => {
   });
 };
 
-// users
+// users all
 export const usersGet = async (
   req: Request,
   res: Response,
@@ -33,7 +34,9 @@ export const usersGet = async (
   }
 };
 
-export const usersPost = async (
+//user sign up
+
+export const usersSignUp = async (
   req: Request,
   res: Response,
   next: NextFunction,
@@ -42,24 +45,94 @@ export const usersPost = async (
     const newUser = req.body;
 
     if (!newUser) {
-      return res.status(404).json({
+      return res.status(400).json({
         message: "No user created",
       });
     }
+
+const existUsername = await prisma.user.findUnique({where:{username: newUser.username}});
+const existEmail = await prisma.user.findUnique({where:{email: newUser.email}});
+
+if(existUsername){
+  return res.status(409).json({
+    message: "Username already exist",
+  });
+}
+if(existEmail){
+  return res.status(409).json({
+    message: "Email already exist",
+  });
+}
+const hashPassword = await bcrypt.hash(newUser.password, 12);
     const user = await prisma.user.create({
       data: {
         username: newUser.username,
         email: newUser.email,
-        password: newUser.password,
+        password: hashPassword,
       },
     });
     console.log(user);
 
     console.log(newUser);
 
-    res.status(200).json({
-      message: "Hello World from the journal newUser!",
+    res.status(201).json({
+      message: "New user created",
       newUser,
+    });
+  } catch (e) {
+    console.log(e);
+    next(e);
+  }
+};
+
+//user login
+
+export const usersLogin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const user = req.body;
+
+    if (!user) {
+      return res.status(400).json({
+        message: "No user",
+      });
+    }
+
+const existUser = await prisma.user.findUnique({where:{email: user.email}});
+
+
+if(!existUser){
+  return res.status(401).json({
+    message: "Wrong Credentials",
+  });
+}
+const existPassword = await bcrypt.compare(user.password, existUser.password);
+
+
+if(!existPassword){
+  return res.status(401).json({
+    message: "Wrong Credentials",
+  });
+}
+
+
+
+    const 
+      data = {
+        username:existUser.username,
+        email: existUser.email,
+        role: existUser.role
+      }
+    
+    console.log(user);
+console.log(data);
+
+    res.status(200).json({
+      message: "User logged in",
+      data,
     });
   } catch (e) {
     console.log(e);
@@ -75,8 +148,12 @@ export const dossiersGet = async (
   next: NextFunction,
 ) => {
   try {
+
+    const dossierLimit = req.body.limit ? Number(req.body.limit)  : undefined;
+  
     const dossiersList = await prisma.dossier.findMany({
       include: {
+        take : (dossierLimit && !isNaN(dossierLimit)) ? dossierLimit : undefined,
         user: {
           select: {
             id: true,
@@ -95,13 +172,13 @@ export const dossiersGet = async (
         },
       },
     });
-    console.log(dossiersList);
     if (!dossiersList || dossiersList.length === 0) {
-      return res.status(404).json({
+      return res.status(400).json({
         message: "No dossiers found",
       });
     }
-    res.status(200).json(
+    res.status(201).json(
+    
     dossiersList
     );
   } catch (e) {
@@ -124,7 +201,7 @@ export const dossiersPost = async (
     const newDossier = req.body;
 
     if (!newDossier) {
-      return res.status(404).json({
+      return res.status(409).json({
         message: "No dossier created",
       });
     }
@@ -139,12 +216,10 @@ export const dossiersPost = async (
         author: newDossier.author,
       },
     });
-    console.log(dossier);
 
-    console.log(newDossier);
 
-    res.status(200).json({
-      message: "Hello World from the journal newDossier!",
+    res.status(201).json({
+      message: "New dossier created!",
       newDossier,
     });
   } catch (e) {
@@ -164,7 +239,7 @@ export const evidencesPost = async (
     const newEvidence = req.body;
 
     if (!newEvidence) {
-      return res.status(404).json({
+      return res.status(409).json({
         message: "No evidence created",
       });
     }
@@ -179,13 +254,11 @@ export const evidencesPost = async (
         author: newEvidence.author,
       },
     });
-    console.log(evidence);
 
-    console.log(newEvidence);
 
-    res.status(200).json({
-      message: "Hello World from the journal newEvidences!",
-      newEvidence,
+    res.status(201).json({
+      message: " New evidence created!",
+      evidence,
     });
   } catch (e) {
     console.log(e);
