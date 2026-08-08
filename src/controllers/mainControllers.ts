@@ -1,5 +1,5 @@
 import { type Request, type Response, type NextFunction } from "express";
-import { prisma } from "../db/client.js";
+import { prisma  } from "../db/client.js";
 import dotenv from "dotenv";
 import bcrypt from "bcrypt";
 dotenv.config();
@@ -149,11 +149,11 @@ export const dossiersGet = async (
 ) => {
   try {
 
-    const dossierLimit = req.query.limit ? Number(req.query.limit)  : undefined;
-  
-    const dossiersList = await prisma.dossier.findMany({
+    const dossierLimit = req.query.limit && (!isNaN(Number(req.query.limit))) ? Number(req.query.limit) : undefined;
+
+    const optionsQuery  = {
+      ...(dossierLimit && {take:dossierLimit}),
       include: {
-        take : (dossierLimit && !isNaN(dossierLimit)) ? dossierLimit : undefined,
         user: {
           select: {
             id: true,
@@ -171,11 +171,14 @@ export const dossiersGet = async (
           },
         },
       },
-    });
+    }
+
+    if(dossierLimit){
+      optionsQuery.take = dossierLimit
+    }
+    const dossiersList = await prisma.dossier.findMany(optionsQuery);
     if (!dossiersList || dossiersList.length === 0) {
-      return res.status(400).json({
-        message: "No dossiers found",
-      });
+      return res.status(200).json([]);
     }
     res.status(201).json(
     
