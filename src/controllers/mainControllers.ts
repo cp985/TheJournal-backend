@@ -3,6 +3,7 @@ import { prisma  } from "../db/client.js";
 import dotenv from "dotenv";
 import bcrypt from "bcrypt";
 import {Resend} from 'resend';
+import { randomUUID } from "node:crypto";
 const resend = new Resend(process.env.RESEND_TOKEN);
 dotenv.config();
 
@@ -391,6 +392,8 @@ const subject = userContact.subject;
 const text = userContact.textarea;
 const username = existUser.username;
 const lang = userContact.lang;
+const idForm = Date.now().toString();
+
 
 const itaHtml = `<div style="background-color: #09090b; color: #d4d4d8; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; padding: 32px 16px; min-height: 100%;">
   <div style="max-w: 600px; margin: 0 auto; background-color: #18181b; border: 1px solid #27272a; border-radius: 6px; padding: 24px;">
@@ -398,7 +401,7 @@ const itaHtml = `<div style="background-color: #09090b; color: #d4d4d8; font-fam
     <!-- Header -->
     <div style="border-bottom: 1px solid #27272a; padding-bottom: 16px; margin-bottom: 20px;">
       <span style="color: #f59e0b; font-size: 11px; font-weight: bold; letter-spacing: 0.05em;">
-        [ CONFERMA RICEZIONE :: ID TICKET #TRX-985 ]
+        [ CONFERMA RICEZIONE :: ID TICKET #TRX-${idForm} ]
       </span>
       <h1 style="color: #f4f4f5; font-size: 20px; font-weight: bold; margin-top: 8px; margin-bottom: 0;">
         Segnalazione Ricevuta
@@ -440,7 +443,7 @@ const engHtml = `<div style="background-color: #09090b; color: #d4d4d8; font-fam
     <!-- Header -->
     <div style="border-bottom: 1px solid #27272a; padding-bottom: 16px; margin-bottom: 20px;">
       <span style="color: #f59e0b; font-size: 11px; font-weight: bold; letter-spacing: 0.05em;">
-        [ RECEIPT CONFIRMATION :: TICKET ID #TRX-985 ]
+        [ RECEIPT CONFIRMATION :: TICKET ID #TRX-${idForm} ]
       </span>
       <h1 style="color: #f4f4f5; font-size: 20px; font-weight: bold; margin-top: 8px; margin-bottom: 0;">
         Report Received
