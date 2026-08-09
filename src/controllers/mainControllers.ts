@@ -46,7 +46,7 @@ export const usersSignUp = async (
 
     if (!newUser) {
       return res.status(400).json({
-        message: "No user created",
+        message: "no-user-found",
       });
     }
 
@@ -55,12 +55,12 @@ const existEmail = await prisma.user.findUnique({where:{email: newUser.email}});
 
 if(existUsername){
   return res.status(409).json({
-    message: "Username already exist",
+    message: "username-already-exist",
   });
 }
 if(existEmail){
   return res.status(409).json({
-    message: "Email already exist",
+    message: "email-already-exist",
   });
 }
 const hashPassword = await bcrypt.hash(newUser.password, 12);
@@ -71,12 +71,9 @@ const hashPassword = await bcrypt.hash(newUser.password, 12);
         password: hashPassword,
       },
     });
-    console.log(user);
-
-    console.log(newUser);
 
     res.status(201).json({
-      message: "New user created",
+      message: "user-signed-up",
       newUser,
     });
   } catch (e) {
@@ -97,7 +94,7 @@ export const usersLogin = async (
 
     if (!user) {
       return res.status(400).json({
-        message: "No user",
+        message: "no-user-found",
       });
     }
 
@@ -106,7 +103,7 @@ const existUser = await prisma.user.findUnique({where:{email: user.email}});
 
 if(!existUser){
   return res.status(401).json({
-    message: "Wrong Credentials",
+    message: "wrong-email",
   });
 }
 const existPassword = await bcrypt.compare(user.password, existUser.password);
@@ -114,7 +111,7 @@ const existPassword = await bcrypt.compare(user.password, existUser.password);
 
 if(!existPassword){
   return res.status(401).json({
-    message: "Wrong Credentials",
+    message: "wrong-password",
   });
 }
 
@@ -127,11 +124,9 @@ if(!existPassword){
         role: existUser.role
       }
     
-    console.log(user);
-console.log(data);
 
     res.status(200).json({
-      message: "User logged in",
+      message: "user-logged-in",
       data,
     });
   } catch (e) {
