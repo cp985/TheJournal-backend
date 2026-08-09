@@ -11,6 +11,6 @@ router.post("/users/login",mainControllers.usersLogin);
 router.post("/dossiers",mainControllers.dossiersPost);
 router.get("/dossiers",mainControllers.dossiersGet);
 router.post("/evidences",mainControllers.evidencesPost);
-router.get("/contact",mainControllers.emailResend);
+router.post("/contact",mainControllers.emailResend);
 
 export default router;

@@ -387,7 +387,7 @@ await resend.emails.send({
 })
 
     res.status(200).json({
-      message: "email-send",
+      message: "email-sent",
     }); 
   } catch (e) {
     console.log(e);
