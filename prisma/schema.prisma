@@ -25,11 +25,11 @@ model Dossier {
   title          String
   description    String
   status         String     @default("Open")
-  author         String
+  author         String?
   description_en String?
   title_en       String?
   coverUrl       String
-  user           User       @relation(fields: [author], references: [id])
+  user           User?       @relation(fields: [author], references: [id], onDelete: SetNull)
   evidences      Evidence[]
   timeline       Timeline[]
 }
@@ -40,10 +40,10 @@ model Evidence {
   type      EvidenceType   @default(PHOTO)
   fileUrl   String
   notes     String
-  author    String
+  author    String?
   notes_en  String?
   status    EvidenceStatus @default(PENDING)
-  user      User           @relation(fields: [author], references: [id])
+  user      User?           @relation(fields: [author], references: [id], onDelete: SetNull)
   dossier   Dossier        @relation(fields: [dossierId], references: [code])
 }
 
