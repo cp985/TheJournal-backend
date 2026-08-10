@@ -3,7 +3,6 @@ import { prisma  } from "../db/client.js";
 import dotenv from "dotenv";
 import bcrypt from "bcrypt";
 import {Resend} from 'resend';
-import { randomUUID } from "node:crypto";
 const resend = new Resend(process.env.RESEND_TOKEN);
 dotenv.config();
 
@@ -35,6 +34,33 @@ export const usersGet = async (
     next(e);
   }
 };
+
+//user by email
+
+export const usersByEmail = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const email = req.body.email;
+  try {
+
+    const user = await prisma.user.findMany({where:{email: email}});
+    if (!user ) {
+      return res.status(404).json({
+        message: "No users found",
+      });
+    }
+    res.status(200).json({
+      message: "user-found",
+      user,
+    });
+  } catch (e) {
+    console.log(e);
+    next(e);
+  }
+};
+
 
 //user sign up
 
