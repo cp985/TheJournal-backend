@@ -21,7 +21,6 @@ export const usersGet = async (
 ) => {
   try {
     const usersList = await prisma.user.findMany();
-    console.log(usersList);
     if (!usersList || usersList.length === 0) {
       return res.status(404).json({
         message: "No users found",
