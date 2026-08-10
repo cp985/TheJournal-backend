@@ -45,12 +45,20 @@ export const usersByEmail = async (
   const email = req.body.email;
   try {
 
-    const user = await prisma.user.findMany({where:{email: email}});
+    const user = await prisma.user.findUnique({where:{email: email},
+    select: {
+        id: true,
+        email: true,
+        username: true,
+        role: true,
+      },});
     if (!user ) {
       return res.status(404).json({
         message: "No users found",
       });
     }
+
+  
     res.status(200).json({
       message: "user-found",
       user,
@@ -198,10 +206,16 @@ await resend.emails.send({
   text:'Benvenuto su TheJournal - You are welcome to TheJournal!',
 })
 
+const createdUser={
+  username:user.username,
+  email:user.email,
+  role:user.role
+}
+
 
     res.status(201).json({
       message: "user-signed-up",
-      newUser,
+      createdUser,
     });
   } catch (e) {
     console.log(e);
