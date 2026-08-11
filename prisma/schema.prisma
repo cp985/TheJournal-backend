@@ -8,13 +8,15 @@ datasource db {
 }
 
 model User {
-  id        String     @id @default(uuid())
-  email     String     @unique
-  password  String
-  createdAt DateTime   @default(now())
-  role      Role       @default(USER)
-  updatedAt DateTime   @updatedAt
-  username  String     @unique
+  id        String   @id @default(uuid())
+  email     String   @unique
+  username  String?  @unique 
+  password  String?  
+  provider  String   @default("credentials") 
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   dossier   Dossier[]
   evidence  Evidence[]
 }
