@@ -9,7 +9,7 @@ router.post("/user/email",mainControllers.usersByEmail);
 router.get("/users",mainControllers.usersGet); 
 router.post("/users/signup",mainControllers.usersSignUp); 
 router.post("/users/login",mainControllers.usersLogin);
-router.post('/user/oauth-sync',mainControllers.usersOAuthSync);
+router.post('/users/oauth-sync',mainControllers.usersOAuthSync);
 router.post("/dossiers",mainControllers.dossiersPost);
 router.get("/dossiers",mainControllers.dossiersGet);
 router.post("/evidences",mainControllers.evidencesPost);
