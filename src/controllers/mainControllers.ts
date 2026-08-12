@@ -3,8 +3,7 @@ import { prisma  } from "../db/client.js";
 import dotenv from "dotenv";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import {Resend} from 'resend';
-import { jwtDecrypt } from "jose";
+import {Resend} from 'resend';import { jwtDecrypt } from "jose";
 import crypto from "crypto";
 const resend = new Resend(process.env.RESEND_TOKEN);
 dotenv.config();
@@ -701,86 +700,47 @@ await resend.emails.send({
 
 //token jwt check
 
+
+
+
+
 export interface AuthenticatedRequest extends Request {
-  user?: { id: string };
+  user?: {
+    id: string;
+    email?: string | undefined;
+  };
 }
 
 export const authenticateToken = (
-
-
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ) => {
-  const authHeader = req.headers["authorization"];
+  const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(" ")[1];
 
   if (!token) {
-    return res.status(401).json({ message: "token-not-found" });
+    return res.status(401).json({ message: "Token mancante" });
+  }
+
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    console.error("❌ JWT_SECRET non impostato su Render");
+    return res.status(500).json({ message: "Errore interno di configurazione" });
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string };
-    
-    req.user = { id: decoded.id };
+    const decoded = jwt.verify(token, secret) as { sub: string; email?: string };
+
+    // Costruiamo l'oggetto includendo solo i campi definiti oppure gestendo il caso undefined
+    req.user = {
+      id: decoded.sub,
+      ...(decoded.email ? { email: decoded.email } : {}),
+    };
+
     next();
-  } catch (err) {
-    return res.status(403).json({ message: "token-not-valid" });
+  } catch (error: any) {
+    console.error("❌ Verifica token fallita:", error.message);
+    return res.status(403).json({ message: "Token non valido o scaduto" });
   }
 };
-
-
-
-
-// async function getAuthJsSecretKey(secret: string) {
-//   const hkdf = crypto.hkdfSync(
-//     "sha256",
-//     secret,
-//     Buffer.alloc(0),
-//     Buffer.from("Auth.js Default Encryption Key"),
-//     32
-//   );
-//   return new Uint8Array(hkdf);
-// }
-
-// export const authenticateToken = async (
-//   req: Request,
-//   res: Response,
-//   next: NextFunction
-// ) => {
-//   try {
-//     const authHeader = req.headers.authorization;
-//     if (!authHeader) {
-//       return res.status(401).json({ message: "Token mancante" });
-//     }
-
-//     // 1. Estraiamo il token
-//     const token = authHeader.split(" ")[1];
-
-//     // 2. Controllo TS: Verifichiamo che token esista e non sia stringa vuota
-//     if (!token) {
-//       return res.status(401).json({ message: "Formato del token non valido" });
-//     }
-
-//     const secret = process.env.JWT_SECRET;
-//     if (!secret) {
-//       return res.status(500).json({ message: "JWT_SECRET non configurato" });
-//     }
-
-//     const encryptionKey = await getAuthJsSecretKey(secret);
-
-//     // Ora TypeScript sa con certezza assoluta che 'token' è una stringa definita!
-//     const { payload } = await jwtDecrypt(token, encryptionKey);
-
-//     if (!payload || (!payload.sub && !payload.id)) {
-//       return res.status(403).json({ message: "Payload token non valido" });
-//     }
-
-//     (req as any).user = { id: (payload.sub || payload.id) as string };
-    
-//     next();
-//   } catch (error) {
-//     console.error("Errore verifica token:", error);
-//     return res.status(403).json({ message: "Token non valido o scaduto" });
-//   }
-// };
