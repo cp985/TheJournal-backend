@@ -705,82 +705,82 @@ export interface AuthenticatedRequest extends Request {
   user?: { id: string };
 }
 
-// export const authenticateToken = (
+export const authenticateToken = (
 
 
-//   req: AuthenticatedRequest,
-//   res: Response,
-//   next: NextFunction
-// ) => {
-//   const authHeader = req.headers["authorization"];
-//   const token = authHeader && authHeader.split(" ")[1];
-
-//   if (!token) {
-//     return res.status(401).json({ message: "token-not-found" });
-//   }
-
-//   try {
-//     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string };
-    
-//     req.user = { id: decoded.id };
-//     next();
-//   } catch (err) {
-//     return res.status(403).json({ message: "token-not-valid" });
-//   }
-// };
-
-
-
-
-async function getAuthJsSecretKey(secret: string) {
-  const hkdf = crypto.hkdfSync(
-    "sha256",
-    secret,
-    Buffer.alloc(0),
-    Buffer.from("Auth.js Default Encryption Key"),
-    32
-  );
-  return new Uint8Array(hkdf);
-}
-
-export const authenticateToken = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({ message: "token-not-found" });
+  }
+
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader) {
-      return res.status(401).json({ message: "Token mancante" });
-    }
-
-    // 1. Estraiamo il token
-    const token = authHeader.split(" ")[1];
-
-    // 2. Controllo TS: Verifichiamo che token esista e non sia stringa vuota
-    if (!token) {
-      return res.status(401).json({ message: "Formato del token non valido" });
-    }
-
-    const secret = process.env.JWT_SECRET;
-    if (!secret) {
-      return res.status(500).json({ message: "JWT_SECRET non configurato" });
-    }
-
-    const encryptionKey = await getAuthJsSecretKey(secret);
-
-    // Ora TypeScript sa con certezza assoluta che 'token' è una stringa definita!
-    const { payload } = await jwtDecrypt(token, encryptionKey);
-
-    if (!payload || (!payload.sub && !payload.id)) {
-      return res.status(403).json({ message: "Payload token non valido" });
-    }
-
-    (req as any).user = { id: (payload.sub || payload.id) as string };
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string };
     
+    req.user = { id: decoded.id };
     next();
-  } catch (error) {
-    console.error("Errore verifica token:", error);
-    return res.status(403).json({ message: "Token non valido o scaduto" });
+  } catch (err) {
+    return res.status(403).json({ message: "token-not-valid" });
   }
 };
+
+
+
+
+// async function getAuthJsSecretKey(secret: string) {
+//   const hkdf = crypto.hkdfSync(
+//     "sha256",
+//     secret,
+//     Buffer.alloc(0),
+//     Buffer.from("Auth.js Default Encryption Key"),
+//     32
+//   );
+//   return new Uint8Array(hkdf);
+// }
+
+// export const authenticateToken = async (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ) => {
+//   try {
+//     const authHeader = req.headers.authorization;
+//     if (!authHeader) {
+//       return res.status(401).json({ message: "Token mancante" });
+//     }
+
+//     // 1. Estraiamo il token
+//     const token = authHeader.split(" ")[1];
+
+//     // 2. Controllo TS: Verifichiamo che token esista e non sia stringa vuota
+//     if (!token) {
+//       return res.status(401).json({ message: "Formato del token non valido" });
+//     }
+
+//     const secret = process.env.JWT_SECRET;
+//     if (!secret) {
+//       return res.status(500).json({ message: "JWT_SECRET non configurato" });
+//     }
+
+//     const encryptionKey = await getAuthJsSecretKey(secret);
+
+//     // Ora TypeScript sa con certezza assoluta che 'token' è una stringa definita!
+//     const { payload } = await jwtDecrypt(token, encryptionKey);
+
+//     if (!payload || (!payload.sub && !payload.id)) {
+//       return res.status(403).json({ message: "Payload token non valido" });
+//     }
+
+//     (req as any).user = { id: (payload.sub || payload.id) as string };
+    
+//     next();
+//   } catch (error) {
+//     console.error("Errore verifica token:", error);
+//     return res.status(403).json({ message: "Token non valido o scaduto" });
+//   }
+// };
