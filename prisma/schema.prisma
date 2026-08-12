@@ -16,7 +16,7 @@ model User {
   role      Role     @default(USER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
+avatar    String? @default("icon:detective")
   dossier   Dossier[]
   evidence  Evidence[]
 }
@@ -44,6 +44,8 @@ model Evidence {
   notes     String
   author    String?
   notes_en  String?
+    createdAt DateTime @default(now())
+
   status    EvidenceStatus @default(PENDING)
   user      User?           @relation(fields: [author], references: [id], onDelete: SetNull)
   dossier   Dossier        @relation(fields: [dossierId], references: [code])
