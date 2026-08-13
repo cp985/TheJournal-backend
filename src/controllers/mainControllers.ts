@@ -39,7 +39,7 @@ export const usersGet = async (
 
 //user patc
 
-export const userPatch = async (
+export const usersPatch = async (
   req: Request,
   res: Response,
   next: NextFunction
