@@ -44,7 +44,7 @@ export const usersPatch = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { username, email, oldPassword, newPassword } = req.body;
+  const { username, email, oldPassword, newPassword, avatar } = req.body;
 
   try {
     if (!email) {
@@ -62,10 +62,14 @@ export const usersPatch = async (
       });
     }
 
-    const dataToUpdate: { username?: string; password?: string } = {};
+    const dataToUpdate: { username?: string; password?: string; avatar?: string  } = {};
 
     if (username) {
       dataToUpdate.username = username;
+    }
+
+    if (avatar) {
+      dataToUpdate.avatar = avatar;
     }
 
     if (newPassword) {
