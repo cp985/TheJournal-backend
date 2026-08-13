@@ -47,6 +47,11 @@ export const usersPatch = async (
   const { username, email, oldPassword, newPassword } = req.body;
 
   try {
+    if (!email) {
+      return res.status(400).json({
+        message: "email-required",
+      });
+    }
     const existingUser = await prisma.user.findUnique({
       where: { email },
     });
