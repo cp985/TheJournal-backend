@@ -117,6 +117,44 @@ export const usersPatch = async (
   }
 };
 
+//user delete
+
+// DELETE /api/users/me
+const usersDelete = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    // 1. Prendi l'ID utente DALLA SESSIONE / TOKEN, mai dalla query o dal body
+    const userId = req.user?.id; 
+    if (!userId) {
+  return res.status(401).json({ message: "User not authenticated" });
+}
+
+    // OPZIONE HARD DELETE (con onDelete: Cascade sul DB):
+    // await prisma.user.delete({
+    //   where: { id: userId },
+    // });
+
+    // OPZIONE SOFT DELETE:
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        email: `deleted_${userId}@deleted.app`, 
+        name: "Deleted User",
+        isDeleted: true,
+        deletedAt: new Date(),
+      },
+    });
+    
+
+   
+    res.clearCookie("session_token");
+
+    return res.status(200).json({ message: "Account deleted successfully" });
+  } catch (error) {
+    console.error("Errore eliminazione account:", error);
+    return res.status(500).json({ message: "Error deleting account" });
+  }
+}
+
 
 
 //user by email

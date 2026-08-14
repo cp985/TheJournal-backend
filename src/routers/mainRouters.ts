@@ -11,6 +11,7 @@ router.patch("/users",mainControllers.authenticateToken,mainControllers.usersPat
 router.post("/users/signup",mainControllers.usersSignUp); 
 router.post("/users/login",mainControllers.usersLogin);
 router.post('/users/oauth-sync',mainControllers.usersOAuthSync);
+router.delete("/users/me",mainControllers.authenticateToken,mainControllers.usersDelete);
 router.post("/dossiers",mainControllers.dossiersPost);
 router.get("/dossiers",mainControllers.dossiersGet);
 router.post("/evidences",mainControllers.evidencesPost);
