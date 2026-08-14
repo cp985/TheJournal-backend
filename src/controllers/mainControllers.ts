@@ -120,7 +120,7 @@ export const usersPatch = async (
 //user delete
 
 // DELETE /api/users/me
-const usersDelete = async (req: AuthenticatedRequest, res: Response) => {
+export const usersDelete = async (req: AuthenticatedRequest, res: Response) => {
   try {
     // 1. Prendi l'ID utente DALLA SESSIONE / TOKEN, mai dalla query o dal body
     const userId = req.user?.id; 
