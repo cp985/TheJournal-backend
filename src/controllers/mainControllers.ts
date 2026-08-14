@@ -833,7 +833,6 @@ export const authenticateToken = (
   try {
     const decoded = jwt.verify(token, secret) as { sub: string; email?: string };
 
-    // Costruiamo l'oggetto includendo solo i campi definiti oppure gestendo il caso undefined
     req.user = {
       id: decoded.sub,
       ...(decoded.email ? { email: decoded.email } : {}),
