@@ -351,9 +351,11 @@ if(!existPassword){
 
     const 
       data = {
+        id: existUser.id,
         username:existUser.username,
         email: existUser.email,
-        role: existUser.role
+        role: existUser.role,
+        avatar: existUser.avatar
       }
     
 
