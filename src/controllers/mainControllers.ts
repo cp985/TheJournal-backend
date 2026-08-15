@@ -727,7 +727,7 @@ export const evidencesPost = async (
         notes: notes || null,
       
         status: "PENDING",
-        author: authorName,
+        author: userId,
       },
     });
 
