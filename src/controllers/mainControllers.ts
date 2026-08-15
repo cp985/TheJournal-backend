@@ -119,28 +119,19 @@ export const usersPatch = async (
 
 //user delete
 
-// DELETE /api/users/me
 export const usersDelete = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    // 1. Prendi l'ID utente DALLA SESSIONE / TOKEN, mai dalla query o dal body
     const userId = req.user?.id; 
     if (!userId) {
-  return res.status(401).json({ message: "user-not-authenticated" });
+  return res.status(401).json({ message: "user-not-authenticated-correctly" });
 }
 
-    // OPZIONE HARD DELETE (con onDelete: Cascade sul DB):
-    // await prisma.user.delete({
-    //   where: { id: userId },
-    // });
 
-    // OPZIONE SOFT DELETE:
     await prisma.user.update({
       where: { id: userId },
       data: {
-        email: `deleted_${userId}@deleted.app`, 
-        name: "Deleted User",
-        isDeleted: true,
-        deletedAt: new Date(),
+    email: `deleted_${userId}@deleted.app`,
+    username: `deleted_${userId}`,
       },
     });
     
