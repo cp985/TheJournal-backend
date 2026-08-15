@@ -691,7 +691,7 @@ export const evidencesPost = async (
 
     const authorName = user?.username ||  "Anonimous";
 
-    const file = req.body.file; 
+    const file = req.file; 
     const { dossierId, type, notes} = req.body;
 
     if (!file) {
