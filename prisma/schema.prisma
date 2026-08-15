@@ -70,7 +70,6 @@ enum Role {
 enum EvidenceType {
   PHOTO
   PDF
-  AUDIO
   DOCUMENT
 }
 
