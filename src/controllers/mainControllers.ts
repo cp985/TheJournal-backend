@@ -125,7 +125,7 @@ export const usersDelete = async (req: AuthenticatedRequest, res: Response) => {
     // 1. Prendi l'ID utente DALLA SESSIONE / TOKEN, mai dalla query o dal body
     const userId = req.user?.id; 
     if (!userId) {
-  return res.status(401).json({ message: "User not authenticated" });
+  return res.status(401).json({ message: "user-not-authenticated" });
 }
 
     // OPZIONE HARD DELETE (con onDelete: Cascade sul DB):
@@ -148,10 +148,10 @@ export const usersDelete = async (req: AuthenticatedRequest, res: Response) => {
    
     res.clearCookie("session_token");
 
-    return res.status(200).json({ message: "Account deleted successfully" });
+    return res.status(200).json({ message: "account-deleted" });
   } catch (error) {
-    console.error("Errore eliminazione account:", error);
-    return res.status(500).json({ message: "Error deleting account" });
+    console.error("Error:", error);
+    return res.status(500).json({ message: "internal-server-error" });
   }
 }
 
@@ -859,13 +859,13 @@ export const authenticateToken = (
   const token = authHeader && authHeader.split(" ")[1];
 
   if (!token) {
-    return res.status(401).json({ message: "Token mancante" });
+    return res.status(401).json({ message: "token-not-found" });
   }
 
   const secret = process.env.JWT_SECRET;
   if (!secret) {
-    console.error("❌ JWT_SECRET non impostato su Render");
-    return res.status(500).json({ message: "Errore interno di configurazione" });
+    console.error("jwt-secret-not-set");
+    return res.status(500).json({ message: "jwt-secret-not-set" });
   }
 
   try {
@@ -878,8 +878,8 @@ export const authenticateToken = (
 
     next();
   } catch (error: any) {
-    console.error("❌ Verifica token fallita:", error.message);
-    return res.status(403).json({ message: "Token non valido o scaduto" });
+    console.error("Error:", error.message);
+    return res.status(403).json({ message: "not-valid-token" });
   }
 };
 
