@@ -146,6 +146,37 @@ export const usersDelete = async (req: AuthenticatedRequest, res: Response) => {
   }
 }
 
+//user export data
+export const exportUserData = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: "user-not-authenticated" });
+    }
+
+    const userData = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        evidence: true, 
+      },
+    });
+
+    if (!userData) {
+      return res.status(404).json({ message: "user-not-found" });
+    }
+
+    const fileName = `data-export-${userId}-${Date.now()}.json`;
+    const jsonContent = JSON.stringify(userData, null, 2);
+
+    res.setHeader("Content-Type", "application/json");
+    res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
+
+    return res.status(200).send(jsonContent);
+  } catch (error) {
+    console.error("Error:", error);
+    return res.status(500).json({ message: "internal-server-error" });
+  }
+};
 
 
 //user by email
