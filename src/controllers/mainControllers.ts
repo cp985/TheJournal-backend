@@ -670,47 +670,7 @@ export const dossiersPost = async (
 
 //evidences
 
-// export const evidencesPost = async (
-//   req: AuthenticatedRequest,
-//   res: Response,
-//   next: NextFunction,
-// ) => {
-//   try {
-//     const userId = req.user?.id;
-//     if (!userId) {
-//       return res.status(401).json({ message: "user-not-authenticated" });
-//     }
-//     const author= await prisma.user.findUnique({where:{id:userId},select:{username:true}});
 
-//     const newEvidence = req.body;
-
-//     if (!newEvidence) {
-//       return res.status(409).json({
-//         message: "no-evidence-created",
-//       });
-//     }
-//     const evidence = await prisma.evidence.create({
-//       data: {
-//         dossierId: newEvidence.dossierId,
-//         type: newEvidence.type,
-//         fileUrl: newEvidence.fileUrl,
-//         notes: newEvidence.notes,
-//         notes_en: newEvidence.notes_en,
-//         status: 'PENDING',
-//         author : author?.username,
-//       },
-//     });
-
-
-//     res.status(201).json({
-//       message: "new-evidence-created",
-//       evidence,
-//     });
-//   } catch (e) {
-//     console.log(e);
-//     next(e);
-//   }
-// };
 
 
 export const evidencesPost = async (
@@ -724,7 +684,6 @@ export const evidencesPost = async (
       return res.status(401).json({ message: "user-not-authenticated" });
     }
 
-    // 1. Recupera l'utente dal DB per ottenere lo username/autore
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { username: true, name: true },
@@ -732,20 +691,18 @@ export const evidencesPost = async (
 
     const authorName = user?.username || user?.name || "Anonimo";
 
-    // 2. Estrai il file elaborato da Multer (req.file) e i campi di testo (req.body)
-    const file = req.body.file; // Serve middleware Multer sulla rotta Express (es. upload.single("file"))
-    const { dossierId, type, notes, notes_en } = req.body;
+    const file = req.body.file; 
+    const { dossierId, type, notes} = req.body;
 
     if (!file) {
       return res.status(400).json({ message: "file-missing" });
     }
 
-    // 3. Upload del file su Supabase Storage
     const fileExt = file.originalname.split(".").pop();
     const fileName = `${userId}/${Date.now()}.${fileExt}`;
 
     const { data: uploadData, error: uploadError } = await supabase.storage
-      .from("evidences") // Nome del tuo bucket su Supabase
+      .from("pending-storage") 
       .upload(fileName, file.buffer, {
         contentType: file.mimetype,
         upsert: false,
@@ -756,31 +713,28 @@ export const evidencesPost = async (
       return res.status(500).json({ message: "file-upload-failed" });
     }
 
-    // 4. Ottieni l'URL Pubblico del file caricato
     const { data: publicUrlData } = supabase.storage
       .from("evidences")
       .getPublicUrl(uploadData.path);
 
     const fileUrl = publicUrlData.publicUrl;
 
-    // 5. Crea la prova nel database via Prisma
     const evidence = await prisma.evidence.create({
       data: {
         dossierId,
         type,
         fileUrl,
         notes: notes || null,
-        notes_en: notes_en || null,
+      
         status: "PENDING",
         author: authorName,
       },
     });
 
-    // 6. Ritorna la risposta con il nome/URL del file per Next.js
     return res.status(201).json({
       message: "new-evidence-created",
       evidence,
-      fileName: fileUrl, // 👈 Questo verrà letto dalla tua Server Action
+      fileName: fileUrl, 
     });
   } catch (e) {
     console.error(e);
