@@ -686,10 +686,10 @@ export const evidencesPost = async (
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { username: true, name: true },
+      select: { username: true },
     });
 
-    const authorName = user?.username || user?.name || "Anonimo";
+    const authorName = user?.username ||  "Anonimous";
 
     const file = req.body.file; 
     const { dossierId, type, notes} = req.body;
@@ -751,7 +751,7 @@ export const evidencesByUserId = async (
     const userId = req.user?.id;
 
     if (!userId) {
-      return res.status(400).json({ message: "Utente non identificato" });
+      return res.status(400).json({ message: "user-not-authenticated" });
     }
 
     const evidencesList = await prisma.evidence.findMany({
