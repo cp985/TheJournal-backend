@@ -1,6 +1,6 @@
 import express from "express";
 import * as mainControllers from "../controllers/mainControllers.js";
-
+import {uploadSingleFile} from "../lib/multerUpload.js";
 const router = express.Router();
 
 
@@ -15,7 +15,7 @@ router.delete("/users/me",mainControllers.authenticateToken,mainControllers.user
 router.get("/users/me/export",mainControllers.authenticateToken,mainControllers.exportUserData);
 router.post("/dossiers",mainControllers.dossiersPost);
 router.get("/dossiers",mainControllers.dossiersGet);
-router.post("/evidences",mainControllers.authenticateToken,mainControllers.evidencesPost);
+router.post("/evidences",uploadSingleFile,mainControllers.authenticateToken,mainControllers.evidencesPost);
 router.get("/evidences/user",mainControllers.authenticateToken,mainControllers.evidencesByUserId);
 
 router.post("/contact",mainControllers.emailResend);
