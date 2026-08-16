@@ -686,9 +686,17 @@ export const evidencesPost = async (
 
     const user = await prisma.user.findUnique({
       
-      where: { id: userId },
-      select: { username: true ,orderBy: { username: "desc" }},
-      
+  where: { 
+    id: userId 
+  },
+  select: { 
+    username: true,
+    evidences: {
+      orderBy: {
+        createdAt: "desc", 
+      },
+    },
+  },
       
     });
 
