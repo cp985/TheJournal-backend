@@ -685,8 +685,10 @@ export const evidencesPost = async (
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: userId },
+      
+      where: { id: userId,sort: { createdAt: "desc" } },
       select: { username: true },
+      
     });
 
     const authorName = user?.username ||  "Anonimous";
