@@ -38,7 +38,7 @@ export const usersGet = async (
   }
 };
 
-//user patc
+//user patch
 
 export const usersPatch = async (
   req: Request,
