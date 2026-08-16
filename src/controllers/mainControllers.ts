@@ -693,7 +693,7 @@ export const evidencesPost = async (
     username: true,
     evidences: {
       orderBy: {
-        createdAt: "desc", 
+        createdAt: "asc", 
       },
     },
   },
