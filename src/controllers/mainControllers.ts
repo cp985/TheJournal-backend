@@ -590,8 +590,6 @@ export const dossiersGet = async (
 
     const optionsQuery  = {
       ...(dossierLimit && {take:dossierLimit}),
-      createdAt: true,
-      updatedAt: true,
       include: {
         user: {
           select: {
