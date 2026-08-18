@@ -29,7 +29,7 @@ export const usersGet = async (
       });
     }
     res.status(200).json({
-      message: "Hello World from the journal userslist!",
+      message: "users-found",
       usersList,
     });
   } catch (e) {
