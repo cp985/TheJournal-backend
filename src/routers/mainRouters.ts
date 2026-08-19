@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.get("/",mainControllers.homeGet); 
 router.post("/user/email",mainControllers.usersByEmail);
-router.get("/users",mainControllers.authenticateToken,mainControllers.usersGet); 
+router.get("/users",mainControllers.authenticateAdminToken,mainControllers.usersGet); 
 router.patch("/users",mainControllers.authenticateToken,mainControllers.usersPatch);
 router.post("/users/signup",mainControllers.usersSignUp); 
 router.post("/users/login",mainControllers.usersLogin);

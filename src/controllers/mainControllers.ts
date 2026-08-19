@@ -25,7 +25,7 @@ export const usersGet = async (
     const usersList = await prisma.user.findMany();
     if (!usersList || usersList.length === 0) {
       return res.status(404).json({
-        message: "No users found",
+        message: "no-users-found",
       });
     }
     res.status(200).json({
@@ -579,53 +579,7 @@ export async function usersOAuthSync(req: Request, res: Response, next: NextFunc
 
 //dossiers
 
-// export const dossiersGet = async (
-//   req: Request,
-//   res: Response,
-//   next: NextFunction,
-// ) => {
-//   try {
 
-//     const dossierLimit = req.query.limit && (!isNaN(Number(req.query.limit))) ? Number(req.query.limit) : undefined;
-
-//     const optionsQuery  = {
-//       ...(dossierLimit && {take:dossierLimit}),
-//       include: {
-//         user: {
-//           select: {
-//             id: true,
-//             username: true,
-//           },
-//         },
-//         evidences: {
-//           include: {
-//             user: {
-//               select: {
-//                 id: true,
-//                 username: true,
-//               },
-//             },
-//           },
-//         },
-//       },
-//     }
-
-//     if(dossierLimit){
-//       optionsQuery.take = dossierLimit
-//     }
-//     const dossiersList = await prisma.dossier.findMany(optionsQuery);
-//     if (!dossiersList || dossiersList.length === 0) {
-//       return res.status(200).json([]);
-//     }
-//     res.status(201).json(
-    
-//     dossiersList
-//     );
-//   } catch (e) {
-//     console.log(e);
-//     next(e);
-//   }
-// };
 
 export const dossiersGet = async (
   req: Request,
@@ -711,6 +665,7 @@ export const dossiersPost = async (
 //soft auth middleware dossier
 
 
+
 export const optionalAuth = (
   req: Request,
   res: Response,
@@ -719,26 +674,22 @@ export const optionalAuth = (
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    console.log("➡️ [AUTH EXPRESS]: Nessun header Bearer ricevuto (GUEST)");
     (req as any).user = undefined;
     return next();
   }
 
   const token = authHeader.split(" ")[1];
-  const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET;
+  const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
 
   if (!token || !secret) {
-    console.log("➡️ [AUTH EXPRESS]: Token o Secret mancante su Express");
     (req as any).user = undefined;
     return next();
   }
 
   try {
     const decoded = jwt.verify(token, secret);
-    console.log("✅ [AUTH EXPRESS]: Utente Autenticato con successo!", decoded);
-    (req as any).user = decoded;
+    (req as any).user = decoded; 
   } catch (error) {
-    console.log("❌ [AUTH EXPRESS]: Errore durante la verifica del JWT:", (error as Error).message);
     (req as any).user = undefined;
   }
 
@@ -1025,3 +976,55 @@ export const authenticateToken = (
 };
 
 
+//admin middleware
+
+
+export interface AuthenticatedRequestAdmin extends Request {
+  user?: {
+    id: string;
+    email?: string;
+    role: string;
+  };
+}
+
+export const authenticateAdminToken = (
+  req: AuthenticatedRequestAdmin,
+  res: Response,
+  next: NextFunction
+) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({ message: "token-not-found" });
+  }
+
+  const secret = process.env.JWT_SECRET || process.env.AUTH_SECRET;
+  if (!secret) {
+    console.error("jwt-secret-not-set");
+    return res.status(500).json({ message: "jwt-secret-not-set" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, secret) as {
+      sub: string;
+      email?: string;
+      role?: string;
+    };
+
+    if (decoded.role !== "ADMIN") {
+      return res.status(403).json({ message: "access-denied-admin-only" });
+    }
+
+    req.user = {
+      id: decoded.sub,
+      role: decoded.role,
+      ...(decoded.email ? { email: decoded.email } : {}),
+    };
+
+    next();
+  } catch (error: any) {
+    console.error("Error:", error.message);
+    return res.status(403).json({ message: "not-valid-token" });
+  }
+};
