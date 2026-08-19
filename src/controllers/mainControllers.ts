@@ -671,7 +671,16 @@ export const evidencesGet = async (
 ) => {
   try {
 
-    const evidencesList = await prisma.evidence.findMany();
+    const evidencesList = await prisma.evidence.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+          },
+        },
+      },
+    });
     return res.status(200).json(evidencesList || []);
    
   } catch (e) {
