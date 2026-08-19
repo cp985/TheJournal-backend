@@ -610,7 +610,6 @@ export const dossiersGet = async (
         },
       },
     });
- console.log('dossier from back',dossiersList);
     return res.status(200).json(dossiersList || []);
    
   } catch (e) {
@@ -665,7 +664,21 @@ export const dossiersPost = async (
 
 //evidences
 
+export const evidencesGet = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
 
+    const evidencesList = await prisma.evidence.findMany();
+    return res.status(200).json(evidencesList || []);
+   
+  } catch (e) {
+    console.log(e);
+    next(e);
+  }
+};
 
 
 export const evidencesPost = async (

@@ -16,6 +16,8 @@ router.get("/users/me/export",mainControllers.authenticateToken,mainControllers.
 router.post("/dossiers",mainControllers.dossiersPost);
 router.get("/dossiers",mainControllers.optionalAuth,mainControllers.dossiersGet);
 router.post("/evidences",mainControllers.authenticateToken,uploadSingleFile,mainControllers.evidencesPost);
+router.get("/evidences",mainControllers.authenticateAdminToken,mainControllers.evidencesGet);
+
 router.get("/evidences/user",mainControllers.authenticateToken,mainControllers.evidencesByUserId);
 
 router.post("/contact",mainControllers.emailResend);
