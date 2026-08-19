@@ -579,17 +579,65 @@ export async function usersOAuthSync(req: Request, res: Response, next: NextFunc
 
 //dossiers
 
+// export const dossiersGet = async (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction,
+// ) => {
+//   try {
+
+//     const dossierLimit = req.query.limit && (!isNaN(Number(req.query.limit))) ? Number(req.query.limit) : undefined;
+
+//     const optionsQuery  = {
+//       ...(dossierLimit && {take:dossierLimit}),
+//       include: {
+//         user: {
+//           select: {
+//             id: true,
+//             username: true,
+//           },
+//         },
+//         evidences: {
+//           include: {
+//             user: {
+//               select: {
+//                 id: true,
+//                 username: true,
+//               },
+//             },
+//           },
+//         },
+//       },
+//     }
+
+//     if(dossierLimit){
+//       optionsQuery.take = dossierLimit
+//     }
+//     const dossiersList = await prisma.dossier.findMany(optionsQuery);
+//     if (!dossiersList || dossiersList.length === 0) {
+//       return res.status(200).json([]);
+//     }
+//     res.status(201).json(
+    
+//     dossiersList
+//     );
+//   } catch (e) {
+//     console.log(e);
+//     next(e);
+//   }
+// };
+
 export const dossiersGet = async (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   try {
+    const user = (req as any).user; 
+    const isAuthenticated = !!user;
 
-    const dossierLimit = req.query.limit && (!isNaN(Number(req.query.limit))) ? Number(req.query.limit) : undefined;
-
-    const optionsQuery  = {
-      ...(dossierLimit && {take:dossierLimit}),
+    const dossiersList = await prisma.dossier.findMany({
+      ...(!isAuthenticated && { take: 3 }), 
       include: {
         user: {
           select: {
@@ -608,19 +656,9 @@ export const dossiersGet = async (
           },
         },
       },
-    }
+    });
 
-    if(dossierLimit){
-      optionsQuery.take = dossierLimit
-    }
-    const dossiersList = await prisma.dossier.findMany(optionsQuery);
-    if (!dossiersList || dossiersList.length === 0) {
-      return res.status(200).json([]);
-    }
-    res.status(201).json(
-    
-    dossiersList
-    );
+    return res.status(200).json(dossiersList || []);
   } catch (e) {
     console.log(e);
     next(e);
