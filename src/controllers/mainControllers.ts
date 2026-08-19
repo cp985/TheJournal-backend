@@ -1053,3 +1053,20 @@ export const authenticateAdminToken = (
     return res.status(403).json({ message: "not-valid-token" });
   }
 };
+
+//health check
+async (req: Request, res: Response) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    
+    return res.status(200).json({ 
+      status: "online", 
+      timestamp: new Date().toISOString() 
+    });
+  } catch (error) {
+    return res.status(500).json({ 
+      status: "offline", 
+      error: "db-error-offline" 
+    });
+  }
+}
