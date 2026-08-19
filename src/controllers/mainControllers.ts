@@ -719,33 +719,31 @@ export const optionalAuth = (
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    console.log("➡️ [AUTH EXPRESS]: Nessun header Bearer ricevuto (GUEST)");
     (req as any).user = undefined;
     return next();
   }
 
   const token = authHeader.split(" ")[1];
-  if (!token) {
-    (req as any).user = undefined;
-    return next();
-  }
-
   const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
-  if (!secret) {
-    console.warn("AUTH_SECRET / NEXTAUTH_SECRET not in .env");
+
+  if (!token || !secret) {
+    console.log("➡️ [AUTH EXPRESS]: Token o Secret mancante su Express");
     (req as any).user = undefined;
     return next();
   }
 
   try {
     const decoded = jwt.verify(token, secret);
+    console.log("✅ [AUTH EXPRESS]: Utente Autenticato con successo!", decoded);
     (req as any).user = decoded;
   } catch (error) {
+    console.log("❌ [AUTH EXPRESS]: Errore durante la verifica del JWT:", (error as Error).message);
     (req as any).user = undefined;
   }
 
   next();
 };
-
 
 //evidences
 
