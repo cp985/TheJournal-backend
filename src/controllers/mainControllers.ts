@@ -28,10 +28,9 @@ export const usersGet = async (
         message: "no-users-found",
       });
     }
-    res.status(200).json({
-      message: "users-found",
-      usersList,
-    });
+    res.status(200).json(
+      usersList
+    );
   } catch (e) {
     console.log(e);
     next(e);
