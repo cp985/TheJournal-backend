@@ -183,7 +183,7 @@ export const usersDelete = async (req: AuthenticatedRequest, res: Response) => {
 
 //delete user admin
 export const userDeleteAdmin = async (req: AuthenticatedRequest, res: Response) => {
-  try{const userId= req.body.id
+  try{const userId= req.body.userId
 if(!userId){
   return res.status(400).json({message: "user-not-found"})
 }
