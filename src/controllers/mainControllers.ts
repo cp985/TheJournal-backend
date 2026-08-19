@@ -657,9 +657,9 @@ export const dossiersGet = async (
         },
       },
     });
-
+ console.log('dossier from back',dossiersList);
     return res.status(200).json(dossiersList || []);
-    console.log('dossier from back',dossiersList);
+   
   } catch (e) {
     console.log(e);
     next(e);
