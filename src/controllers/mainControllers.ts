@@ -707,6 +707,46 @@ export const dossiersPost = async (
   }
 };
 
+
+//soft auth middleware dossier
+
+
+export const optionalAuth = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    (req as any).user = undefined;
+    return next();
+  }
+
+  const token = authHeader.split(" ")[1];
+  if (!token) {
+    (req as any).user = undefined;
+    return next();
+  }
+
+  const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
+  if (!secret) {
+    console.warn("AUTH_SECRET / NEXTAUTH_SECRET not in .env");
+    (req as any).user = undefined;
+    return next();
+  }
+
+  try {
+    const decoded = jwt.verify(token, secret);
+    (req as any).user = decoded;
+  } catch (error) {
+    (req as any).user = undefined;
+  }
+
+  next();
+};
+
+
 //evidences
 
 

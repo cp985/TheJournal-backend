@@ -14,7 +14,7 @@ router.post('/users/oauth-sync',mainControllers.usersOAuthSync);
 router.delete("/users/me",mainControllers.authenticateToken,mainControllers.usersDelete);
 router.get("/users/me/export",mainControllers.authenticateToken,mainControllers.exportUserData);
 router.post("/dossiers",mainControllers.dossiersPost);
-router.get("/dossiers",mainControllers.authenticateToken,mainControllers.dossiersGet);
+router.get("/dossiers",mainControllers.optionalAuth,mainControllers.dossiersGet);
 router.post("/evidences",mainControllers.authenticateToken,uploadSingleFile,mainControllers.evidencesPost);
 router.get("/evidences/user",mainControllers.authenticateToken,mainControllers.evidencesByUserId);
 
