@@ -725,7 +725,7 @@ export const optionalAuth = (
   }
 
   const token = authHeader.split(" ")[1];
-  const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
+  const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET;
 
   if (!token || !secret) {
     console.log("➡️ [AUTH EXPRESS]: Token o Secret mancante su Express");
