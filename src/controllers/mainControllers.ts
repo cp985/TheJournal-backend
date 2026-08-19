@@ -942,7 +942,7 @@ export const optionalAuth = (req: Request, res: Response, next: NextFunction) =>
   }
 
   const token = authHeader.split(" ")[1];
-  const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
+  const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET;
 
   if (!token || !secret) {
     console.log("TOKEN O SECRET MANCANTI", { token: !!token, secret: !!secret });
