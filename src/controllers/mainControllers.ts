@@ -661,39 +661,7 @@ export const dossiersPost = async (
 };
 
 
-//soft auth middleware dossier
 
-
-
-export const optionalAuth = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    (req as any).user = undefined;
-    return next();
-  }
-
-  const token = authHeader.split(" ")[1];
-  const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
-
-  if (!token || !secret) {
-    (req as any).user = undefined;
-    return next();
-  }
-
-  try {
-    const decoded = jwt.verify(token, secret);
-    (req as any).user = decoded; 
-  } catch (error) {
-    (req as any).user = undefined;
-  }
-
-  next();
-};
 
 //evidences
 
@@ -928,6 +896,70 @@ await resend.emails.send({
     console.log(e);
     next(e);
   }
+};
+
+//soft auth middleware dossier
+
+
+
+// export const optionalAuth = (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ) => {
+//   const authHeader = req.headers.authorization;
+
+//   if (!authHeader || !authHeader.startsWith("Bearer ")) {
+//     (req as any).user = undefined;
+//     return next();
+//   }
+
+//   const token = authHeader.split(" ")[1];
+//   const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
+
+//   if (!token || !secret) {
+//     (req as any).user = undefined;
+//     return next();
+//   }
+
+//   try {
+//     const decoded = jwt.verify(token, secret);
+//     (req as any).user = decoded; 
+//   } catch (error) {
+//     (req as any).user = undefined;
+//   }
+
+//   next();
+// };
+
+export const optionalAuth = (req: Request, res: Response, next: NextFunction) => {
+  const authHeader = req.headers.authorization;
+  console.log("AUTH HEADER RICEVUTO:", authHeader); // 👈 arriva l'header?
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    (req as any).user = undefined;
+    return next();
+  }
+
+  const token = authHeader.split(" ")[1];
+  const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
+
+  if (!token || !secret) {
+    console.log("TOKEN O SECRET MANCANTI", { token: !!token, secret: !!secret });
+    (req as any).user = undefined;
+    return next();
+  }
+
+  try {
+    const decoded = jwt.verify(token, secret);
+    console.log("TOKEN VERIFICATO CON SUCCESSO:", decoded); // 👈 arriva qui?
+    (req as any).user = decoded;
+  } catch (error) {
+    console.log("JWT VERIFY FALLITO:", error); // 👈 il pezzo mancante — perché fallisce?
+    (req as any).user = undefined;
+  }
+
+  next();
 };
 
 //token jwt check
