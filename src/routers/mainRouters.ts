@@ -23,6 +23,6 @@ router.get("/evidences/user",mainControllers.authenticateToken,mainControllers.e
 router.post("/contact",mainControllers.emailResend);
 
 // backend/routes/health.ts (o direttamente in index.ts)
-router.get("/health",mainControllers.authenticateAdminToken, mainControllers.healthGet);
+router.get("/health",mainControllers.healthGet);
 
 export default router;

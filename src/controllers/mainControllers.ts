@@ -1055,7 +1055,7 @@ export const authenticateAdminToken = (
 };
 
 //health check
-async (req: Request, res: Response) => {
+export const healthGet = async (req: Request, res: Response) => {
   try {
     await prisma.$queryRaw`SELECT 1`;
     
