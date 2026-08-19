@@ -119,30 +119,91 @@ export const usersPatch = async (
 
 //user delete
 
+// export const usersDelete = async (req: AuthenticatedRequest, res: Response) => {
+//   try {
+//     const userId = req.user?.id; 
+//     if (!userId) {
+//   return res.status(401).json({ message: "user-not-authenticated-correctly" });
+// }
+
+
+//     await prisma.user.update({
+//       where: { id: userId },
+//       data: {
+//     email: `deleted_${userId}@deleted.app`,
+//     username: `deleted_${userId}`,
+//       },
+//     });
+    
+
+   
+//     res.clearCookie("session_token");
+
+//     return res.status(200).json({ message: "account-deleted" });
+//   } catch (error) {
+//     console.error("Error:", error);
+//     return res.status(500).json({ message: "internal-server-error" });
+//   }
+// }
+
 export const usersDelete = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const userId = req.user?.id; 
+    const userId = req.user?.id;
     if (!userId) {
-  return res.status(401).json({ message: "user-not-authenticated-correctly" });
-}
+      return res.status(401).json({ message: "user-not-authenticated-correctly" });
+    }
 
+    const shortHash = crypto.randomBytes(3).toString("hex"); // es. "a9f2b8"
+    
+    const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+
+    const anonymousUsername = `Anonimo_${dateStr}_${shortHash}`;
+
+    const anonymousEmail = `deleted_${userId}@deleted.local`;
 
     await prisma.user.update({
       where: { id: userId },
       data: {
-    email: `deleted_${userId}@deleted.app`,
-    username: `deleted_${userId}`,
+        username: anonymousUsername,
+        email: anonymousEmail,
       },
     });
-    
 
-   
     res.clearCookie("session_token");
 
-    return res.status(200).json({ message: "account-deleted" });
+    return res.status(200).json({ 
+      message: "account-deleted",
+      anonymizedAs: anonymousUsername 
+    });
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error during user anonymization:", error);
     return res.status(500).json({ message: "internal-server-error" });
+  }
+};
+
+//delete user admin
+export const userDeleteAdmin = async (req: AuthenticatedRequest, res: Response) => {
+  try{const userId= req.body.id
+if(!userId){
+  return res.status(400).json({message: "user-not-found"})
+}
+const deletedUser = await prisma.user.delete({
+  where: {id: userId}
+})
+
+if(!deletedUser){
+  return res.status(404).json({message: "user-not-found"})
+}
+return res.status(200).json({
+  message: "user-deleted-successfully",
+  user: deletedUser
+})
+
+
+  }
+  catch(e){
+    console.error(e)
+    return res.status(500).json({message: "internal-server-error"})
   }
 }
 
