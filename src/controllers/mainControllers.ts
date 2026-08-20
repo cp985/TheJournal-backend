@@ -207,6 +207,91 @@ return res.status(200).json({
   }
 }
 
+//role update admin
+
+// export const userRoleAdmin = async (req: AuthenticatedRequest, res: Response) => {
+//   try{const userId= req.body.userId
+// if(!userId){
+//   return res.status(400).json({message: "user-not-found"})
+
+// }
+
+// const existUser = await prisma.user.findUnique({where:{id: userId}});
+// if(!existUser){
+//   return res.status(404).json({message: "user-not-found"})
+// }
+// let userRole = existUser.role
+
+// if(userRole === "ADMIN"){
+//   userRole = "USER"
+// } else {
+//   userRole = "ADMIN"
+// }
+// const updateUser = await prisma.user.update({
+//   where: {id: userId},
+//   data: {
+//     role: userRole
+//   }
+// })
+
+// if(!updateUser){
+//   return res.status(404).json({message: "user-not-found"})
+// }
+// return res.status(200).json({
+//   message: "user-updated-successfully",
+//   user: updateUser
+// })
+
+
+//   }
+//   catch(e){
+//     console.error(e)
+//     return res.status(500).json({message: "internal-server-error"})
+//   }
+// }
+export const adminToggleUserRole = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+   
+
+    const { userId } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({ message: "userId-required" });
+    }
+
+    const existUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, role: true }, 
+    });
+
+    if (!existUser) {
+      return res.status(404).json({ message: "user-not-found" });
+    }
+
+  
+
+    const newRole = existUser.role === "ADMIN" ? "USER" : "ADMIN";
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { role: newRole },
+      select: {
+        id: true,
+        username: true,
+        role: true,
+      },
+    });
+
+    return res.status(200).json({
+      message: "user-role-toggled-successfully",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error("Error in adminToggleUserRole:", error);
+    return res.status(500).json({ message: "internal-server-error" });
+  }
+};
+
 //user export data
 export const exportUserData = async (req: AuthenticatedRequest, res: Response) => {
   try {

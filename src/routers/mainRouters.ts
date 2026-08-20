@@ -7,6 +7,7 @@ const router = express.Router();
 router.get("/",mainControllers.homeGet); 
 router.post("/user/email",mainControllers.usersByEmail);
 router.delete("/users/admin",mainControllers.authenticateAdminToken,mainControllers.userDeleteAdmin);
+router.patch("/users/admin",mainControllers.authenticateAdminToken,mainControllers.adminToggleUserRole);
 
 router.get("/users",mainControllers.authenticateAdminToken,mainControllers.usersGet); 
 router.patch("/users",mainControllers.authenticateToken,mainControllers.usersPatch);
