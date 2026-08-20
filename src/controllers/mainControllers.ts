@@ -292,23 +292,67 @@ return res.status(200).json({
 //   }
 // };
 // controllers/adminController.ts
+// export const adminUpdateUserRole = async (req: AuthenticatedRequest, res: Response) => {
+//   try {
+
+//     const user = req.user as { id: string; role: string };
+//     if (user?.role !== "ADMIN") {
+//       return res.status(403).json({ message: "forbidden-admin-only" });
+//     }
+
+//     const { userId, newRole } = req.body;
+
+//     if (!userId || !newRole) {
+//       return res.status(400).json({ message: "userId-and-newRole-required" });
+//     }
+
+//     if (!["USER", "ADMIN"].includes(newRole)) {
+//       return res.status(400).json({ message: "invalid-role" });
+//     }
+
+//     if (userId === user.id && newRole !== "ADMIN") {
+//       return res.status(400).json({ message: "cannot-demote-yourself" });
+//     }
+
+//     const updatedUser = await prisma.user.update({
+//       where: { id: userId },
+//       data: { role: newRole },
+//       select: { id: true, username: true, role: true }, 
+//     });
+
+//     return res.status(200).json({
+//       message: "user-role-updated",
+//       user: updatedUser,
+//     });
+//   } catch (error) {
+//     console.error("Error updating user role:", error);
+//     return res.status(500).json({ message: "internal-server-error" });
+//   }
+// };
+
 export const adminUpdateUserRole = async (req: AuthenticatedRequest, res: Response) => {
   try {
-
     const user = req.user as { id: string; role: string };
     if (user?.role !== "ADMIN") {
       return res.status(403).json({ message: "forbidden-admin-only" });
     }
 
-    const { userId, newRole } = req.body;
+    const { userId } = req.body;
 
-    if (!userId || !newRole) {
-      return res.status(400).json({ message: "userId-and-newRole-required" });
+    if (!userId) {
+      return res.status(400).json({ message: "userId-required" });
     }
 
-    if (!["USER", "ADMIN"].includes(newRole)) {
-      return res.status(400).json({ message: "invalid-role" });
+    const existUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, role: true },
+    });
+
+    if (!existUser) {
+      return res.status(404).json({ message: "user-not-found" });
     }
+
+    const newRole = existUser.role === "ADMIN" ? "USER" : "ADMIN";
 
     if (userId === user.id && newRole !== "ADMIN") {
       return res.status(400).json({ message: "cannot-demote-yourself" });
@@ -317,11 +361,11 @@ export const adminUpdateUserRole = async (req: AuthenticatedRequest, res: Respon
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: { role: newRole },
-      select: { id: true, username: true, role: true }, 
+      select: { id: true, username: true, role: true },
     });
 
     return res.status(200).json({
-      message: "user-role-updated",
+      message: "user-role-toggled-successfully",
       user: updatedUser,
     });
   } catch (error) {
