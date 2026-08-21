@@ -18,7 +18,10 @@ router.delete("/users/me",mainControllers.authenticateToken,mainControllers.user
 router.get("/users/me/export",mainControllers.authenticateToken,mainControllers.exportUserData);
 router.post("/dossiers/admin",mainControllers.authenticateAdminToken,mainControllers.dossiersPostAdmin);
 router.patch("/dossiers/admin",mainControllers.authenticateAdminToken,mainControllers.dossierPatchAdmin)
+router.delete("/dossiers/admin",mainControllers.authenticateAdminToken,mainControllers.dossierDeleteAdmin)
+
 router.get("/dossiers",mainControllers.optionalAuth,mainControllers.dossiersGet);
+
 router.post("/evidences",mainControllers.authenticateToken,uploadSingleFile,mainControllers.evidencesPost);
 router.get("/evidences",mainControllers.authenticateAdminToken,mainControllers.evidencesGet);
 

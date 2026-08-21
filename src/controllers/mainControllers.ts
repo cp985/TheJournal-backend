@@ -782,7 +782,30 @@ export const dossierPatchAdmin = async (
   }
 }
 
+export const dossierDeleteAdmin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.body; 
 
+    if (!id) {
+      return res.status(400).json({ message: "dossier-id-found" });
+    }
+
+    await prisma.dossier.delete({
+      where: {
+        id: id,
+      },
+    });
+
+    return res.status(200).json({ success: true, message: "dossier-deleted" });
+  } catch (e) {
+    console.log(e);
+    next(e);
+  }
+};
  
 
 //evidences
