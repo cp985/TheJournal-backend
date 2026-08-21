@@ -2,6 +2,7 @@ import { type Request, type Response, type NextFunction } from "express";
 import { prisma  } from "../db/client.js";
 import dotenv from "dotenv";
 import bcrypt from "bcrypt";
+
 import jwt from "jsonwebtoken";
 import { supabase } from "../lib/supabaseClient.js";
 import {Resend} from 'resend';import { jwtDecrypt } from "jose";
@@ -711,105 +712,206 @@ export const dossiersGet = async (
 
 
 
+// export const dossiersPostAdmin = async (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction,
+// ) => {
+//   try {
+//     const newDossier = req.body;
+
+//     if (!newDossier) {
+//       return res.status(409).json({
+//         message: "No dossier created",
+//       });
+//     }
+//     const dossier = await prisma.dossier.create({
+//       data: {
+//         code: newDossier.code,
+//         coverUrl: newDossier.coverUrl,
+//         title: newDossier.title,
+//         title_en: newDossier.tite_en,
+//         description: newDossier.description,
+//         description_en: newDossier.description_en,
+//         author: newDossier.author,
+//       },
+//     });
+
+
+//     res.status(201).json({
+//       message: "New dossier created!",
+//       newDossier,
+//     });
+//   } catch (e) {
+//     console.log(e);
+//     next(e);
+//   }
+// };
+
+
+// export const dossierPatchAdmin = async (
+//   req: AuthenticatedRequest,
+//   res: Response,
+//   next: NextFunction
+// )=>{
+//   try {
+//        const user = req.user as { id: string; role: string };
+//     if (user?.role !== "ADMIN") {
+//       return res.status(403).json({ message: "forbidden-admin-only" });
+//     }
+//     const dossierId = req.body.id;
+//     if (!dossierId) {
+//       return res.status(400).json({ message: "dossier-id-found" });
+//     }
+//     const dossier = await prisma.dossier.findUnique({
+//       where: { id: dossierId },
+//     });
+//     if (!dossier) {
+//       return res.status(404).json({ message: "dossier-not-found" });
+//     }
+//     const updatedDossier = await prisma.dossier.update({
+//       where: { id: dossierId },
+//       data: req.body,
+//     });
+//     res.status(200).json({
+//       message: "dossier-updated-successfully",
+//       updatedDossier,
+//     });
+//   } catch (e) {
+//     console.log(e);
+//     next(e);
+//   }
+// }
+
+// export const dossierDeleteAdmin = async (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ) => {
+//   try {
+//     const { id } = req.body; 
+
+//     if (!id) {
+//       return res.status(400).json({ message: "dossier-id-found" });
+//     }
+
+//     await prisma.dossier.delete({
+//       where: {
+//         id: id,
+//       },
+//     });
+
+//     return res.status(200).json({ success: true, message: "dossier-deleted" });
+//   } catch (e) {
+//     console.log(e);
+//     next(e);
+//   }
+// };
+ 
+
+//evidences
+
+
+
+// --- CREA DOSSIER ---
 export const dossiersPostAdmin = async (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   try {
     const newDossier = req.body;
 
     if (!newDossier) {
-      return res.status(409).json({
-        message: "No dossier created",
-      });
+      return res.status(400).json({ message: "no-dossier-data-provided" });
     }
+
     const dossier = await prisma.dossier.create({
       data: {
         code: newDossier.code,
         coverUrl: newDossier.coverUrl,
         title: newDossier.title,
-        title_en: newDossier.tite_en,
+        title_en: newDossier.title_en, 
         description: newDossier.description,
         description_en: newDossier.description_en,
         author: newDossier.author,
       },
     });
 
-
-    res.status(201).json({
-      message: "New dossier created!",
-      newDossier,
+    return res.status(201).json({
+      message: "dossier-created-successfully",
+      dossier,
     });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     next(e);
   }
 };
 
-
+// --- MODIFICA DOSSIER ---
 export const dossierPatchAdmin = async (
-  req: AuthenticatedRequest,
+  req: Request,
   res: Response,
   next: NextFunction
-)=>{
+) => {
   try {
-       const user = req.user as { id: string; role: string };
-    if (user?.role !== "ADMIN") {
-      return res.status(403).json({ message: "forbidden-admin-only" });
+    const { id, ...updateData } = req.body;
+
+    if (!id) {
+      return res.status(400).json({ message: "dossier-id-required" });
     }
-    const dossierId = req.body.id;
-    if (!dossierId) {
-      return res.status(400).json({ message: "dossier-id-found" });
-    }
+
     const dossier = await prisma.dossier.findUnique({
-      where: { id: dossierId },
+      where: { id },
     });
+
     if (!dossier) {
       return res.status(404).json({ message: "dossier-not-found" });
     }
+
     const updatedDossier = await prisma.dossier.update({
-      where: { id: dossierId },
-      data: req.body,
+      where: { id },
+      data: updateData, // 
     });
-    res.status(200).json({
+
+    return res.status(200).json({
       message: "dossier-updated-successfully",
       updatedDossier,
     });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     next(e);
   }
-}
+};
 
+// --- ELIMINA DOSSIER ---
 export const dossierDeleteAdmin = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const { id } = req.body; 
+    const { id } = req.body;
 
     if (!id) {
-      return res.status(400).json({ message: "dossier-id-found" });
+      return res.status(400).json({ message: "dossier-id-required" });
     }
 
     await prisma.dossier.delete({
-      where: {
-        id: id,
-      },
+      where: { id },
     });
 
-    return res.status(200).json({ success: true, message: "dossier-deleted" });
+    return res.status(200).json({ 
+      success: true, 
+      message: "dossier-deleted-successfully" 
+    });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     next(e);
   }
 };
- 
 
-//evidences
-
+//evidence users
 export const evidencesGet = async (
   req: Request,
   res: Response,
@@ -934,6 +1036,131 @@ export const evidencesByUserId = async (
     next(e);
   }
 };
+
+
+//evidence admin
+
+
+interface AuthenticatedRequest extends Request {
+  user?: {
+    id: string;
+    email?: string;
+    role?: string;
+  };
+}
+
+// --- CREA EVIDENCE ---
+export const evidencesPostAdmin = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const user = req.user;
+    if (user?.role !== "ADMIN") {
+      return res.status(403).json({ message: "forbidden-admin-only" });
+    }
+
+    const newEvidence = req.body;
+
+    if (!newEvidence) {
+      return res.status(400).json({ message: "no-evidence-data-provided" });
+    }
+
+    const evidence = await prisma.evidence.create({
+      data: {
+        notes: newEvidence.title,
+        notes_en: newEvidence.title_en,
+        fileUrl: newEvidence.mediaUrl,
+        type: newEvidence.type,
+        dossierId: newEvidence.dossierId,
+      author:newEvidence.author
+      },
+    });
+
+    return res.status(201).json({
+      message: "evidence-created-successfully",
+      evidence,
+    });
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+};
+
+// --- MODIFICA EVIDENCE ---
+export const evidencePatchAdmin = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const user = req.user;
+    if (user?.role !== "ADMIN") {
+      return res.status(403).json({ message: "forbidden-admin-only" });
+    }
+
+    const { id, ...updateData } = req.body;
+
+    if (!id) {
+      return res.status(400).json({ message: "evidence-id-required" });
+    }
+
+    const evidence = await prisma.evidence.findUnique({
+      where: { id },
+    });
+
+    if (!evidence) {
+      return res.status(404).json({ message: "evidence-not-found" });
+    }
+
+    const updatedEvidence = await prisma.evidence.update({
+      where: { id },
+      data: updateData,
+    });
+
+    return res.status(200).json({
+      message: "evidence-updated-successfully",
+      updatedEvidence,
+    });
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+};
+
+// --- ELIMINA EVIDENCE ---
+export const evidenceDeleteAdmin = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const user = req.user;
+    if (user?.role !== "ADMIN") {
+      return res.status(403).json({ message: "forbidden-admin-only" });
+    }
+
+    const { id } = req.body;
+
+    if (!id) {
+      return res.status(400).json({ message: "evidence-id-required" });
+    }
+
+    await prisma.evidence.delete({
+      where: { id },
+    });
+
+    return res.status(200).json({ 
+      success: true, 
+      message: "evidence-deleted-successfully" 
+    });
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+};
+
 
 //email contact 
 
@@ -1106,12 +1333,7 @@ export const optionalAuth = (req: Request, res: Response, next: NextFunction) =>
 
 
 
-export interface AuthenticatedRequest extends Request {
-  user?: {
-    id: string;
-    email?: string | undefined;
-  };
-}
+
 
 export const authenticateToken = (
   req: AuthenticatedRequest,

@@ -24,6 +24,9 @@ router.get("/dossiers",mainControllers.optionalAuth,mainControllers.dossiersGet)
 
 router.post("/evidences",mainControllers.authenticateToken,uploadSingleFile,mainControllers.evidencesPost);
 router.get("/evidences",mainControllers.authenticateAdminToken,mainControllers.evidencesGet);
+router.post("/evidences/admin",mainControllers.authenticateAdminToken,mainControllers.evidencesPostAdmin);
+router.patch("/evidences/admin",mainControllers.authenticateAdminToken,mainControllers.evidencePatchAdmin);
+router.delete("/evidences/admin",mainControllers.authenticateAdminToken,mainControllers.evidenceDeleteAdmin);
 
 router.get("/evidences/user",mainControllers.authenticateToken,mainControllers.evidencesByUserId);
 
