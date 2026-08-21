@@ -675,6 +675,9 @@ export const dossiersGet = async (
 
     const dossiersList = await prisma.dossier.findMany({
       ...(!isAuthenticated && { take: 3 }), 
+      orderBy: {
+        code: "asc", 
+      },
       include: {
         user: {
           select: {
