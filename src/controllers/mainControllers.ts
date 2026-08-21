@@ -708,7 +708,7 @@ export const dossiersGet = async (
 
 
 
-export const dossiersPost = async (
+export const dossiersPostAdmin = async (
   req: Request,
   res: Response,
   next: NextFunction,
@@ -745,7 +745,42 @@ export const dossiersPost = async (
 };
 
 
+export const dossierPatchAdmin = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+)=>{
+  try {
+       const user = req.user as { id: string; role: string };
+    if (user?.role !== "ADMIN") {
+      return res.status(403).json({ message: "forbidden-admin-only" });
+    }
+    const dossierId = req.body.id;
+    if (!dossierId) {
+      return res.status(400).json({ message: "dossier-id-found" });
+    }
+    const dossier = await prisma.dossier.findUnique({
+      where: { id: dossierId },
+    });
+    if (!dossier) {
+      return res.status(404).json({ message: "dossier-not-found" });
+    }
+    const updatedDossier = await prisma.dossier.update({
+      where: { id: dossierId },
+      data: req.body,
+    });
+    res.status(200).json({
+      message: "dossier-updated-successfully",
+      updatedDossier,
+    });
+  } catch (e) {
+    console.log(e);
+    next(e);
+  }
+}
 
+
+ 
 
 //evidences
 
