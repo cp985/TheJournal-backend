@@ -758,10 +758,14 @@ export const dossiersPostAdmin = async (
 
 // --- MODIFICA DOSSIER ---
 export const dossierPatchAdmin = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ) => {
+   const user = req.user;
+    if (user?.role !== "ADMIN") {
+      return res.status(403).json({ message: "forbidden-admin-only" });
+    }
   try {
     const { id, ...updateData } = req.body;
 
