@@ -979,7 +979,7 @@ export const evidencesPostAdmin = async (
       data: {
         notes: newEvidence.title,
         notes_en: newEvidence.title_en,
-        fileUrl: newEvidence.mediaUrl,
+        fileUrl: newEvidence.fileUrl,
         type: newEvidence.type,
         dossierId: newEvidence.dossierId,
       author:user.id
