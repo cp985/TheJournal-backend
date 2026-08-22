@@ -977,8 +977,8 @@ export const evidencesPostAdmin = async (
 
     const evidence = await prisma.evidence.create({
       data: {
-        notes: newEvidence.title,
-        notes_en: newEvidence.title_en,
+        notes: newEvidence.notes,
+        notes_en: newEvidence.notes_en,
         fileUrl: newEvidence.fileUrl,
         type: newEvidence.type,
         dossierId: newEvidence.dossierId,
