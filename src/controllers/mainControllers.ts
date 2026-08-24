@@ -207,7 +207,7 @@ export const userDeleteAdmin = async (req: AuthenticatedRequest, res: Response) 
         username: anonymousName,
         email: anonymousEmail,
         password: "", 
-        image: null,  
+        avatar: null,  
       },
     });
 
