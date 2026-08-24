@@ -133,7 +133,7 @@ export const usersDelete = async (req: AuthenticatedRequest, res: Response) => {
     
     const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");
 
-    const anonymousUsername = `Anonimo_${dateStr}_${shortHash}`;
+    const anonymousUsername = `Anonymous_${dateStr}_${shortHash}`;
 
     const anonymousEmail = `deleted_${userId}@deleted.local`;
 
@@ -158,30 +158,64 @@ export const usersDelete = async (req: AuthenticatedRequest, res: Response) => {
 };
 
 //delete user admin
+// export const userDeleteAdmin = async (req: AuthenticatedRequest, res: Response) => {
+//   try{const userId= req.body.userId
+// if(!userId){
+//   return res.status(400).json({message: "user-not-found"})
+// }
+// const deletedUser = await prisma.user.delete({
+//   where: {id: userId}
+// })
+
+// if(!deletedUser){
+//   return res.status(404).json({message: "user-not-found"})
+// }
+// return res.status(200).json({
+//   message: "user-deleted-successfully",
+//   user: deletedUser
+// })
+
+
+//   }
+//   catch(e){
+//     console.error(e)
+//     return res.status(500).json({message: "internal-server-error"})
+//   }
+// }
+
+
 export const userDeleteAdmin = async (req: AuthenticatedRequest, res: Response) => {
-  try{const userId= req.body.userId
-if(!userId){
-  return res.status(400).json({message: "user-not-found"})
-}
-const deletedUser = await prisma.user.delete({
-  where: {id: userId}
-})
+  try {
+    const userId = req.body.userId;
 
-if(!deletedUser){
-  return res.status(404).json({message: "user-not-found"})
-}
-return res.status(200).json({
-  message: "user-deleted-successfully",
-  user: deletedUser
-})
+    if (!userId) {
+      return res.status(400).json({ message: "user-not-found" });
+    }
 
+    const uniqueSuffix = crypto.randomUUID().slice(0, 8);
+    const anonymousName = `Anonymous_${uniqueSuffix}`;
+    const anonymousEmail = `deleted_${userId}@deleted.local`;
 
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        username: anonymousName,
+        email: anonymousEmail,
+        password: "", 
+        image: null,  
+      },
+    });
+
+    return res.status(200).json({
+      message: "user-deleted-successfully",
+      user: updatedUser,
+    });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: "internal-server-error" });
   }
-  catch(e){
-    console.error(e)
-    return res.status(500).json({message: "internal-server-error"})
-  }
-}
+};
+
 
 //role update admin
 
