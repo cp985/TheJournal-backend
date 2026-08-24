@@ -129,7 +129,7 @@ export const usersDelete = async (req: AuthenticatedRequest, res: Response) => {
       return res.status(401).json({ message: "user-not-authenticated-correctly" });
     }
 
-    const shortHash = crypto.randomBytes(3).toString("hex"); // es. "a9f2b8"
+    const shortHash = crypto.randomBytes(3).toString("hex"); 
     
     const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");
 
@@ -158,30 +158,7 @@ export const usersDelete = async (req: AuthenticatedRequest, res: Response) => {
 };
 
 //delete user admin
-// export const userDeleteAdmin = async (req: AuthenticatedRequest, res: Response) => {
-//   try{const userId= req.body.userId
-// if(!userId){
-//   return res.status(400).json({message: "user-not-found"})
-// }
-// const deletedUser = await prisma.user.delete({
-//   where: {id: userId}
-// })
 
-// if(!deletedUser){
-//   return res.status(404).json({message: "user-not-found"})
-// }
-// return res.status(200).json({
-//   message: "user-deleted-successfully",
-//   user: deletedUser
-// })
-
-
-//   }
-//   catch(e){
-//     console.error(e)
-//     return res.status(500).json({message: "internal-server-error"})
-//   }
-// }
 
 
 export const userDeleteAdmin = async (req: AuthenticatedRequest, res: Response) => {
@@ -943,6 +920,7 @@ export const evidencesPost = async (
         type,
         fileUrl,
         notes: notes || null,
+        notes_en: notes || null,
       
         status: "PENDING",
         author: userId,
