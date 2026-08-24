@@ -185,7 +185,12 @@ export const usersDelete = async (req: AuthenticatedRequest, res: Response) => {
 
 
 export const userDeleteAdmin = async (req: AuthenticatedRequest, res: Response) => {
+
   try {
+      const user = req.user as { id: string; role: string };
+    if (user?.role !== "ADMIN") {
+      return res.status(403).json({ message: "forbidden-admin-only" });
+    }
     const userId = req.body.userId;
 
     if (!userId) {
