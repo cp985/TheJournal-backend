@@ -8,15 +8,15 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  username  String?  @unique 
-  password  String?  
-  provider  String   @default("credentials") 
-  role      Role     @default(USER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-avatar    String? @default("icon:detective")
+  id        String     @id @default(uuid())
+  email     String     @unique
+  username  String?    @unique
+  password  String?
+  provider  String     @default("credentials")
+  role      Role       @default(USER)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  avatar    String?    @default("icon:detective")
   dossier   Dossier[]
   evidence  Evidence[]
 }
@@ -31,37 +31,40 @@ model Dossier {
   description_en String?
   title_en       String?
   coverUrl       String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-  user           User?       @relation(fields: [author], references: [id], onDelete: SetNull)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @default(now()) @updatedAt
+  user           User?      @relation(fields: [author], references: [id], onDelete: SetNull)
   evidences      Evidence[]
   timeline       Timeline[]
 }
 
 model Evidence {
-  id        String         @id @default(dbgenerated("gen_random_uuid()"))
+  id        String       @id @default(dbgenerated("gen_random_uuid()"))
   dossierId String
-  type      EvidenceType   @default(PHOTO)
+  type      EvidenceType @default(PHOTO)
   fileUrl   String
   notes     String
   author    String?
   notes_en  String?
-    createdAt DateTime @default(now())
+  createdAt DateTime     @default(now())
 
-  status    EvidenceStatus @default(PENDING)
-  user      User?           @relation(fields: [author], references: [id], onDelete: SetNull)
-  dossier   Dossier        @relation(fields: [dossierId], references: [code])
+  status     EvidenceStatus @default(PENDING)
+  user       User?          @relation(fields: [author], references: [id], onDelete: SetNull)
+  dossier    Dossier        @relation(fields: [dossierId], references: [code])
+  timelineId String?
+  timeline Timeline? @relation(fields: [timelineId], references: [id], onDelete: SetNull)
 }
 
 model Timeline {
-  id             String   @id @default(uuid())
+  id             String     @id @default(uuid())
   date           DateTime
   title          String
-  description    String   @db.VarChar(255)
+  description    String     @db.VarChar(255)
   dossierId      String
-  description_en String?  @db.VarChar(255)
+  description_en String?    @db.VarChar(255)
   title_en       String?
-  dossier        Dossier  @relation(fields: [dossierId], references: [code], onDelete: Cascade)
+  dossier        Dossier    @relation(fields: [dossierId], references: [code], onDelete: Cascade)
+  evidences      Evidence[]
 }
 
 enum Role {
