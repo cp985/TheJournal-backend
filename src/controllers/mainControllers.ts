@@ -1371,20 +1371,20 @@ export const healthGet = async (req: Request, res: Response) => {
 //timeline add node skeleton
 
 export const postTimelineSkeletonAdmin = async (req: AuthenticatedRequest, res: Response) => {
-  try{  const user = req.user as { id: string; role: string };
+  try {
+    const user = req.user as { id: string; role: string };
 
-  if (user?.role !== "ADMIN") {
-    return res.status(403).json({ message: "forbidden-admin-only" });
-  }
-const { timeline } = req.body;
+    if (user?.role !== "ADMIN") {
+      return res.status(403).json({ message: "forbidden-admin-only" });
+    }
 
-if (!timeline || timeline.length === 0|| !Array.isArray(timeline)) {
-  return res.status(400).json({ message: "timeline-not-found" });
-}
+    const { timeline } = req.body;
 
+    if (!timeline || !Array.isArray(timeline) || timeline.length === 0) {
+      return res.status(400).json({ message: "timeline-not-found" });
+    }
 
-
-const formattedData = timeline.map((item: any) => ({
+    const formattedData = timeline.map((item: any) => ({
       title: item.title,
       description: item.description,
       date: new Date(item.date),
@@ -1393,24 +1393,26 @@ const formattedData = timeline.map((item: any) => ({
       dossierId: item.dossierId,
     }));
 
-const response = await prisma.timeline.createMany({
-  data: 
-    formattedData
-  
-});
+    const response = await prisma.timeline.createMany({
+      data: formattedData,
+    });
 
-if (response.count === 0) {
-  return res.status(500).json({ message: "server-error" });
-}
+    if (response.count === 0) {
+      return res.status(500).json({ message: "server-error" });
+    }
 
-return res.status(200).json({ message: "timeline-created" ,count: response.count});
+    return res.status(201).json({ message: "timeline-created", count: response.count });
 
-}
+  } catch (error) {
+    // Intercetta l'errore di chiave esterna di Prisma (dossierId non esistente)
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2003"
+    ) {
+      return res.status(404).json({ message: "dossier-not-found" });
+    }
 
-catch (error) {
-  console.error("Error:", error);
-  return res.status(500).json({ message: "internal-server-error" });
-}
-
-
-}
+    console.error("Error:", error);
+    return res.status(500).json({ message: "internal-server-error" });
+  }
+};
