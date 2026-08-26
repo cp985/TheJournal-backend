@@ -1404,13 +1404,9 @@ export const postTimelineSkeletonAdmin = async (req: AuthenticatedRequest, res: 
     return res.status(201).json({ message: "timeline-created", count: response.count });
 
   } catch (error) {
-    // Intercetta l'errore di chiave esterna di Prisma (dossierId non esistente)
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2003"
-    ) {
-      return res.status(404).json({ message: "dossier-not-found" });
-    }
+ if (typeof error === "object" && error !== null && "code" in error && error.code === "P2003") {
+    return res.status(404).json({ message: "dossier-not-found" });
+  }
 
     console.error("Error:", error);
     return res.status(500).json({ message: "internal-server-error" });
