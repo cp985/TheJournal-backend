@@ -1426,17 +1426,13 @@ export const timelineGetWithDossierId = async (
       where: {
         dossierId: dossierId,
       },
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        date: true,
-        title_en: true,
-        description_en: true,
-      },
       orderBy: {
         date: "asc",
-      }
+      },
+      include: {
+      evidences: true, 
+    },
+      
     });
     return res.status(200).json(timelineList || {});
    
