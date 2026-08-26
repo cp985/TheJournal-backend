@@ -1226,8 +1226,6 @@ await resend.emails.send({
 
 
 
-
-
 export const optionalAuth = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
   console.log("AUTH HEADER RICEVUTO:", authHeader); // 👈 arriva l'header?
@@ -1259,8 +1257,6 @@ export const optionalAuth = (req: Request, res: Response, next: NextFunction) =>
 };
 
 //token jwt check
-
-
 
 
 
@@ -1410,5 +1406,42 @@ export const postTimelineSkeletonAdmin = async (req: AuthenticatedRequest, res: 
 
     console.error("Error:", error);
     return res.status(500).json({ message: "internal-server-error" });
+  }
+};
+
+//timeline get
+
+export const timelineGetWithDossierId = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const dossierId= req.params.dossierId as string;
+  if (!dossierId) {
+    return res.status(400).json({ message: "dossier-id-required" });
+  }
+  try {
+
+    const timelineList = await prisma.timeline.findMany({
+      where: {
+        dossierId: dossierId,
+      },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        date: true,
+        title_en: true,
+        description_en: true,
+      },
+      orderBy: {
+        date: "asc",
+      }
+    });
+    return res.status(200).json(timelineList || {});
+   
+  } catch (e) {
+    console.log(e);
+    next(e);
   }
 };
