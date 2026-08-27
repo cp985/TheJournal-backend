@@ -808,7 +808,7 @@ export const dossierPatchAdmin = async (
 
     const updatedDossier = await prisma.dossier.update({
       where: { id },
-      data: updateData, // 
+      data: updateData, 
     });
 
     return res.status(200).json({
@@ -896,7 +896,7 @@ export const evidencesPost = async (
     const authorName = user?.username ||  "Anonimous";
 
     const file = req.file; 
-    const { dossierId, type, notes} = req.body;
+    const { dossierId, type, notes,timeline, notes_en} = req.body;
 
     if (!file) {
       return res.status(400).json({ message: "file-missing" });
@@ -929,7 +929,8 @@ export const evidencesPost = async (
         type,
         fileUrl,
         notes: notes || null,
-        notes_en: notes || null,
+        notes_en: notes_en || null,
+        timelineId: timeline || null,
       
         status: "PENDING",
         author: userId,
@@ -1011,6 +1012,7 @@ export const evidencesPostAdmin = async (
         notes_en: newEvidence.notes_en,
         fileUrl: newEvidence.fileUrl,
         type: newEvidence.type,
+        timelineId: newEvidence.timelineId,
         dossierId: newEvidence.dossierId,
       author:user.id
       },
