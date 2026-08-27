@@ -896,7 +896,7 @@ export const evidencesPost = async (
     const authorName = user?.username ||  "Anonimous";
 
     const file = req.file; 
-    const { dossierId, type, notes,timeline, notes_en} = req.body;
+    const { dossierId, type, notes,timelineId, notes_en} = req.body;
 
     if (!file) {
       return res.status(400).json({ message: "file-missing" });
@@ -930,7 +930,7 @@ export const evidencesPost = async (
         fileUrl,
         notes: notes || null,
         notes_en: notes_en || null,
-        timelineId: timeline || null,
+        timelineId: timelineId || null,
       
         status: "PENDING",
         author: userId,
