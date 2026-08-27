@@ -712,6 +712,15 @@ export const dossiersGet = async (
             },
           },
         },
+        timeline: {
+          select: {
+            id: true,
+            title: true,
+            title_en: true,
+            date: true,
+          }
+          
+        }
       },
     });
     return res.status(200).json(dossiersList || []);
