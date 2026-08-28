@@ -1047,44 +1047,6 @@ interface AuthenticatedRequest extends Request {
 }
 
 // --- CREA EVIDENCE ---
-// export const evidencesPostAdmin = async (
-//   req: AuthenticatedRequest,
-//   res: Response,
-//   next: NextFunction
-// ) => {
-//   try {
-//     const user = req.user;
-//     if (user?.role !== "ADMIN") {
-//       return res.status(403).json({ message: "forbidden-admin-only" });
-//     }
-
-//     const newEvidence = req.body;
-
-//     if (!newEvidence) {
-//       return res.status(400).json({ message: "no-evidence-data-provided" });
-//     }
-
-//     const evidence = await prisma.evidence.create({
-//       data: {
-//         notes: newEvidence.notes,
-//         notes_en: newEvidence.notes_en,
-//         fileUrl: newEvidence.fileUrl,
-//         type: newEvidence.type,
-//         timelineId: newEvidence.timelineId,
-//         dossierId: newEvidence.dossierId,
-//       author:user.id
-//       },
-//     });
-
-//     return res.status(201).json({
-//       message: "evidence-created-successfully",
-//       evidence,
-//     });
-//   } catch (e) {
-//     console.error(e);
-//     next(e);
-//   }
-// };
 
 export const evidencesPostAdmin = async (
   req: AuthenticatedRequest,
