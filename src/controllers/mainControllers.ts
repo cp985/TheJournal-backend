@@ -733,11 +733,6 @@ export const dossiersGet = async (
 
 
 
- 
-
-//evidences
-
-
 
 // --- CREA DOSSIER ---
 export const dossiersPostAdmin = async (
@@ -875,6 +870,79 @@ export const evidencesGet = async (
 };
 
 
+// export const evidencesPost = async (
+//   req: AuthenticatedRequest,
+//   res: Response,
+//   next: NextFunction
+// ) => {
+//   try {
+//     const userId = req.user?.id;
+//     if (!userId) {
+//       return res.status(401).json({ message: "user-not-authenticated" });
+//     }
+
+//     const user = await prisma.user.findUnique({
+      
+//       where: { id: userId },
+//       select: { username: true },
+      
+//     });
+
+//     const authorName = user?.username ||  "Anonimous";
+
+//     const file = req.file; 
+//     const { dossierId, type, notes,timelineId, notes_en} = req.body;
+
+//     if (!file) {
+//       return res.status(400).json({ message: "file-missing" });
+//     }
+
+//     const fileExt = file.originalname.split(".").pop();
+//     const fileName = `${userId}/${Date.now()}.${fileExt}`;
+
+//     const { data: uploadData, error: uploadError } = await supabase.storage
+//       .from("pending-storage") 
+//       .upload(fileName, file.buffer, {
+//         contentType: file.mimetype,
+//         upsert: false,
+//       });
+
+//     if (uploadError) {
+//       console.error("Supabase storage error:", uploadError);
+//       return res.status(500).json({ message: "file-upload-failed" });
+//     }
+
+//     const { data: publicUrlData } = supabase.storage
+//       .from("evidences")
+//       .getPublicUrl(uploadData.path);
+
+//     const fileUrl = publicUrlData.publicUrl;
+
+//     const evidence = await prisma.evidence.create({
+//       data: {
+//         dossierId,
+//         type,
+//         fileUrl,
+//         notes: notes || null,
+//         notes_en: notes_en || null,
+//         timelineId: timelineId || null,
+      
+//         status: "PENDING",
+//         author: userId,
+//       },
+//     });
+
+//     return res.status(201).json({
+//       message: "new-evidence-created",
+//       evidence,
+//       fileName: fileUrl, 
+//     });
+//   } catch (e) {
+//     console.error(e);
+//     next(e);
+//   }
+// };
+
 export const evidencesPost = async (
   req: AuthenticatedRequest,
   res: Response,
@@ -886,17 +954,8 @@ export const evidencesPost = async (
       return res.status(401).json({ message: "user-not-authenticated" });
     }
 
-    const user = await prisma.user.findUnique({
-      
-      where: { id: userId },
-      select: { username: true },
-      
-    });
-
-    const authorName = user?.username ||  "Anonimous";
-
-    const file = req.file; 
-    const { dossierId, type, notes,timelineId, notes_en} = req.body;
+    const file = req.file;
+    const { dossierId, type, notes, timelineId, notes_en } = req.body;
 
     if (!file) {
       return res.status(400).json({ message: "file-missing" });
@@ -906,7 +965,7 @@ export const evidencesPost = async (
     const fileName = `${userId}/${Date.now()}.${fileExt}`;
 
     const { data: uploadData, error: uploadError } = await supabase.storage
-      .from("pending-storage") 
+      .from("pending-storage")
       .upload(fileName, file.buffer, {
         contentType: file.mimetype,
         upsert: false,
@@ -918,7 +977,7 @@ export const evidencesPost = async (
     }
 
     const { data: publicUrlData } = supabase.storage
-      .from("evidences")
+      .from("pending-storage")
       .getPublicUrl(uploadData.path);
 
     const fileUrl = publicUrlData.publicUrl;
@@ -931,8 +990,7 @@ export const evidencesPost = async (
         notes: notes || null,
         notes_en: notes_en || null,
         timelineId: timelineId || null,
-      
-        status: "PENDING",
+        status: "PENDING", 
         author: userId,
       },
     });
@@ -940,10 +998,10 @@ export const evidencesPost = async (
     return res.status(201).json({
       message: "new-evidence-created",
       evidence,
-      fileName: fileUrl, 
+      fileName: fileUrl,
     });
   } catch (e) {
-    console.error(e);
+    console.error("Error in evidencesPost:", e);
     next(e);
   }
 };
@@ -989,44 +1047,113 @@ interface AuthenticatedRequest extends Request {
 }
 
 // --- CREA EVIDENCE ---
+// export const evidencesPostAdmin = async (
+//   req: AuthenticatedRequest,
+//   res: Response,
+//   next: NextFunction
+// ) => {
+//   try {
+//     const user = req.user;
+//     if (user?.role !== "ADMIN") {
+//       return res.status(403).json({ message: "forbidden-admin-only" });
+//     }
+
+//     const newEvidence = req.body;
+
+//     if (!newEvidence) {
+//       return res.status(400).json({ message: "no-evidence-data-provided" });
+//     }
+
+//     const evidence = await prisma.evidence.create({
+//       data: {
+//         notes: newEvidence.notes,
+//         notes_en: newEvidence.notes_en,
+//         fileUrl: newEvidence.fileUrl,
+//         type: newEvidence.type,
+//         timelineId: newEvidence.timelineId,
+//         dossierId: newEvidence.dossierId,
+//       author:user.id
+//       },
+//     });
+
+//     return res.status(201).json({
+//       message: "evidence-created-successfully",
+//       evidence,
+//     });
+//   } catch (e) {
+//     console.error(e);
+//     next(e);
+//   }
+// };
+
 export const evidencesPostAdmin = async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const user = req.user;
-    if (user?.role !== "ADMIN") {
+    const userAdmin = req.user;
+
+    if (userAdmin?.role !== "ADMIN") {
       return res.status(403).json({ message: "forbidden-admin-only" });
     }
 
-    const newEvidence = req.body;
-
-    if (!newEvidence) {
-      return res.status(400).json({ message: "no-evidence-data-provided" });
+    const file = req.file;
+    if (!file) {
+      return res.status(400).json({ message: "file-missing" });
     }
+
+    const { dossierId, type, status, notes, notes_en, timelineId } = req.body;
+
+    if (!dossierId || !type) {
+      return res.status(400).json({ message: "missing-required-fields" });
+    }
+
+    const fileExt = file.originalname.split(".").pop();
+    const fileName = `${userAdmin.id}/${Date.now()}.${fileExt}`;
+
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from("pending-storage")
+      .upload(fileName, file.buffer, {
+        contentType: file.mimetype,
+        upsert: false,
+      });
+
+    if (uploadError) {
+      console.error("Supabase storage error:", uploadError);
+      return res.status(500).json({ message: "file-upload-failed" });
+    }
+
+    const { data: publicUrlData } = supabase.storage
+      .from("pending-storage")
+      .getPublicUrl(uploadData.path);
+
+    const fileUrl = publicUrlData.publicUrl;
 
     const evidence = await prisma.evidence.create({
       data: {
-        notes: newEvidence.notes,
-        notes_en: newEvidence.notes_en,
-        fileUrl: newEvidence.fileUrl,
-        type: newEvidence.type,
-        timelineId: newEvidence.timelineId,
-        dossierId: newEvidence.dossierId,
-      author:user.id
+        dossierId,
+        type,
+        fileUrl,
+        status: status || "PENDING", 
+        notes: notes || null,
+        notes_en: notes_en || null,
+        timelineId: timelineId || null,
+        author: userAdmin.id,
       },
     });
 
     return res.status(201).json({
-      message: "evidence-created-successfully",
+      message: "new-evidence-created",
       evidence,
+      fileName: fileUrl,
     });
   } catch (e) {
-    console.error(e);
+    console.error("Error in evidencesPostAdmin:", e);
     next(e);
   }
 };
+
 
 // --- MODIFICA EVIDENCE ---
 export const evidencePatchAdmin = async (
