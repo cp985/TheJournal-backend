@@ -870,78 +870,6 @@ export const evidencesGet = async (
 };
 
 
-// export const evidencesPost = async (
-//   req: AuthenticatedRequest,
-//   res: Response,
-//   next: NextFunction
-// ) => {
-//   try {
-//     const userId = req.user?.id;
-//     if (!userId) {
-//       return res.status(401).json({ message: "user-not-authenticated" });
-//     }
-
-//     const user = await prisma.user.findUnique({
-      
-//       where: { id: userId },
-//       select: { username: true },
-      
-//     });
-
-//     const authorName = user?.username ||  "Anonimous";
-
-//     const file = req.file; 
-//     const { dossierId, type, notes,timelineId, notes_en} = req.body;
-
-//     if (!file) {
-//       return res.status(400).json({ message: "file-missing" });
-//     }
-
-//     const fileExt = file.originalname.split(".").pop();
-//     const fileName = `${userId}/${Date.now()}.${fileExt}`;
-
-//     const { data: uploadData, error: uploadError } = await supabase.storage
-//       .from("pending-storage") 
-//       .upload(fileName, file.buffer, {
-//         contentType: file.mimetype,
-//         upsert: false,
-//       });
-
-//     if (uploadError) {
-//       console.error("Supabase storage error:", uploadError);
-//       return res.status(500).json({ message: "file-upload-failed" });
-//     }
-
-//     const { data: publicUrlData } = supabase.storage
-//       .from("evidences")
-//       .getPublicUrl(uploadData.path);
-
-//     const fileUrl = publicUrlData.publicUrl;
-
-//     const evidence = await prisma.evidence.create({
-//       data: {
-//         dossierId,
-//         type,
-//         fileUrl,
-//         notes: notes || null,
-//         notes_en: notes_en || null,
-//         timelineId: timelineId || null,
-      
-//         status: "PENDING",
-//         author: userId,
-//       },
-//     });
-
-//     return res.status(201).json({
-//       message: "new-evidence-created",
-//       evidence,
-//       fileName: fileUrl, 
-//     });
-//   } catch (e) {
-//     console.error(e);
-//     next(e);
-//   }
-// };
 
 export const evidencesPost = async (
   req: AuthenticatedRequest,
@@ -1191,6 +1119,10 @@ export const evidenceDeleteAdmin = async (
 };
 
 
+//--MAP --
+
+
+
 //email contact 
 
 export const emailResend= async (req: Request, res: Response, next: NextFunction) => {
@@ -1328,7 +1260,6 @@ await resend.emails.send({
 
 export const optionalAuth = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
-  console.log("AUTH HEADER RICEVUTO:", authHeader); // 👈 arriva l'header?
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     (req as any).user = undefined;
@@ -1339,17 +1270,14 @@ export const optionalAuth = (req: Request, res: Response, next: NextFunction) =>
   const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET;
 
   if (!token || !secret) {
-    console.log("TOKEN O SECRET MANCANTI", { token: !!token, secret: !!secret });
     (req as any).user = undefined;
     return next();
   }
 
   try {
     const decoded = jwt.verify(token, secret);
-    console.log("TOKEN VERIFICATO CON SUCCESSO:", decoded); // 👈 arriva qui?
     (req as any).user = decoded;
   } catch (error) {
-    console.log("JWT VERIFY FALLITO:", error); // 👈 il pezzo mancante — perché fallisce?
     (req as any).user = undefined;
   }
 

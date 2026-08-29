@@ -19,6 +19,7 @@ model User {
   avatar    String?    @default("icon:detective")
   dossier   Dossier[]
   evidence  Evidence[]
+followedDossiers Dossier[] @relation("UserFollowedDossiers")
 }
 
 model Dossier {
@@ -36,6 +37,7 @@ model Dossier {
   user           User?      @relation(fields: [author], references: [id], onDelete: SetNull)
   evidences      Evidence[]
   timeline       Timeline[]
+  followers User[]   @relation("UserFollowedDossiers")
 }
 
 model Evidence {
