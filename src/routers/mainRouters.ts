@@ -20,6 +20,8 @@ router.post("/dossiers/admin",mainControllers.authenticateAdminToken,mainControl
 router.patch("/dossiers/admin",mainControllers.authenticateAdminToken,mainControllers.dossierPatchAdmin)
 router.delete("/dossiers/admin",mainControllers.authenticateAdminToken,mainControllers.dossierDeleteAdmin)
 router.get("/dossiers",mainControllers.optionalAuth,mainControllers.dossiersGet);
+router.post('/dossier/toggle-followedCase',mainControllers.authenticateToken,mainControllers.toggleFollowDossier);
+
 
 router.post("/evidences",mainControllers.authenticateToken,uploadSingleFile,mainControllers.evidencesPost);
 router.get("/evidences",mainControllers.authenticateAdminToken,mainControllers.evidencesGet);

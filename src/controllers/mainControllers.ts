@@ -681,19 +681,21 @@ export async function usersOAuthSync(req: Request, res: Response, next: NextFunc
 
 
 
+
+
 export const dossiersGet = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const user = (req as any).user; 
+    const user = (req as any).user;
     const isAuthenticated = !!user;
-
+    const userId = user?.sub || user?.id; 
     const dossiersList = await prisma.dossier.findMany({
-      ...(!isAuthenticated && { take: 3 }), 
+      ...(!isAuthenticated && { take: 3 }),
       orderBy: {
-        code: "asc", 
+        code: "asc",
       },
       include: {
         user: {
@@ -702,6 +704,12 @@ export const dossiersGet = async (
             username: true,
           },
         },
+        ...(isAuthenticated && userId && {
+          followers: {
+            where: { id: userId },
+            select: { id: true },
+          },
+        }),
         evidences: {
           include: {
             user: {
@@ -718,13 +726,25 @@ export const dossiersGet = async (
             title: true,
             title_en: true,
             date: true,
-          }
-          
-        }
+          },
+        },
       },
     });
-    return res.status(200).json(dossiersList || []);
-   
+
+    const formattedDossiers = dossiersList.map((dossier : any) => {
+      const isFollowed = isAuthenticated 
+        ? Array.isArray((dossier as any).followers) && (dossier as any).followers.length > 0 
+        : false;
+
+      const { followers, ...rest } = dossier as any;
+
+      return {
+        ...rest,
+        isFollowed, 
+      };
+    });
+
+    return res.status(200).json(formattedDossiers || []);
   } catch (e) {
     console.log(e);
     next(e);
@@ -1467,5 +1487,76 @@ export const timelineGetWithDossierId = async (
   } catch (e) {
     console.log(e);
     next(e);
+  }
+};
+
+
+//toggle followed case 
+
+export const toggleFollowDossier = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = (req as any).user?.id || (req as any).user?.sub;
+    const { caseId } = req.body;
+
+    if (!userId || !caseId) {
+      return res.status(400).json({
+        success: false,
+        followedIds: [],
+        error: "missing-user-or-case-id",
+      });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        followedDossiers: {
+          select: { id: true },
+        },
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        followedIds: [],
+        error: "user-not-found",
+      });
+    }
+
+    const isCurrentlyFollowed = user.followedDossiers.some(
+      (d: any) => d.id === caseId
+    );
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        followedDossiers: isCurrentlyFollowed
+          ? { disconnect: { id: caseId } }
+          : { connect: { id: caseId } },
+      },
+      select: {
+        followedDossiers: {
+          select: { id: true },
+        },
+      },
+    });
+
+    const followedIds = updatedUser.followedDossiers.map((d:any) => d.id);
+
+    return res.status(200).json({
+      success: true,
+      followedIds,
+    });
+  } catch (error) {
+    console.error("Errore toggle follow:", error);
+    return res.status(500).json({
+      success: false,
+      followedIds: [],
+      error: "errors-toggle-followed-case",
+    });
   }
 };
