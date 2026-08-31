@@ -1491,7 +1491,7 @@ export const timelineGetWithDossierId = async (
 };
 
 
-//toggle followed case 
+//followed case 
 
 export const toggleFollowDossier = async (
   req: Request,
@@ -1557,6 +1557,56 @@ export const toggleFollowDossier = async (
       success: false,
       followedIds: [],
       error: "errors-toggle-followed-case",
+    });
+  }
+};
+
+
+export const getFollowedDossiers = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = (req as any).user?.id || (req as any).user?.sub;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        followedIds: [],
+        error: "unauthorized",
+      });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        followedDossiers: {
+          select: { id: true }, 
+        },
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        followedIds: [],
+        error: "user-not-found",
+      });
+    }
+
+    const followedIds = user.followedDossiers.map((dossier) => dossier.id);
+
+    return res.status(200).json({
+      success: true,
+      followedIds,
+    });
+  } catch (error) {
+    console.error("Errore nel recupero dei casi seguiti:", error);
+    return res.status(500).json({
+      success: false,
+      followedIds: [],
+      error: "internal-server-error",
     });
   }
 };
