@@ -723,6 +723,7 @@ export const dossiersGet = async (
         timeline: {
           select: {
             id: true,
+            dossierId: true,
             title: true,
             title_en: true,
             date: true,
