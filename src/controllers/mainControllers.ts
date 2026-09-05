@@ -1417,6 +1417,51 @@ export const healthGet = async (req: Request, res: Response) => {
 
 //timeline add node skeleton
 
+// export const postTimelineSkeletonAdmin = async (req: AuthenticatedRequest, res: Response) => {
+//   try {
+//     const user = req.user as { id: string; role: string };
+
+//     if (user?.role !== "ADMIN") {
+//       return res.status(403).json({ message: "forbidden-admin-only" });
+//     }
+
+//     const { timeline } = req.body;
+
+//     if (!timeline || !Array.isArray(timeline) || timeline.length === 0) {
+//       return res.status(400).json({ message: "timeline-not-found" });
+//     }
+
+//     const formattedData = timeline.map((item: any) => ({
+//       title: item.title,
+//       description: item.description,
+//       date: new Date(item.date),
+//       title_en: item.title_en || null,
+//       description_en: item.description_en || null,
+//       dossierId: item.dossierId,
+//     }));
+
+//     const response = await prisma.timeline.createMany({
+//       data: formattedData,
+//     });
+
+//     if (response.count === 0) {
+//       return res.status(500).json({ message: "server-error" });
+//     }
+
+//     return res.status(201).json({ message: "timeline-created", count: response.count });
+
+//   } catch (error) {
+//  if (typeof error === "object" && error !== null && "code" in error && error.code === "P2003") {
+//     return res.status(404).json({ message: "dossier-not-found" });
+//   }
+
+//     console.error("Error:", error);
+//     return res.status(500).json({ message: "internal-server-error" });
+//   }
+// };
+
+
+
 export const postTimelineSkeletonAdmin = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const user = req.user as { id: string; role: string };
@@ -1431,6 +1476,13 @@ export const postTimelineSkeletonAdmin = async (req: AuthenticatedRequest, res: 
       return res.status(400).json({ message: "timeline-not-found" });
     }
 
+    // Estraiamo il dossierId dal primo elemento (assumendo sia unico per la lista)
+    const targetDossierId = timeline[0]?.dossierId;
+
+    if (!targetDossierId) {
+      return res.status(400).json({ message: "dossier-id-missing" });
+    }
+
     const formattedData = timeline.map((item: any) => ({
       title: item.title,
       description: item.description,
@@ -1440,25 +1492,34 @@ export const postTimelineSkeletonAdmin = async (req: AuthenticatedRequest, res: 
       dossierId: item.dossierId,
     }));
 
-    const response = await prisma.timeline.createMany({
-      data: formattedData,
+    const result = await prisma.$transaction(async (tx) => {
+      await tx.timeline.deleteMany({
+        where: { dossierId: targetDossierId },
+      });
+
+      const created = await tx.timeline.createMany({
+        data: formattedData,
+      });
+
+      return created;
     });
 
-    if (response.count === 0) {
+    if (result.count === 0) {
       return res.status(500).json({ message: "server-error" });
     }
 
-    return res.status(201).json({ message: "timeline-created", count: response.count });
+    return res.status(201).json({ message: "timeline-updated", count: result.count });
 
   } catch (error) {
- if (typeof error === "object" && error !== null && "code" in error && error.code === "P2003") {
-    return res.status(404).json({ message: "dossier-not-found" });
-  }
+    if (typeof error === "object" && error !== null && "code" in error && error.code === "P2003") {
+      return res.status(404).json({ message: "dossier-not-found" });
+    }
 
     console.error("Error:", error);
     return res.status(500).json({ message: "internal-server-error" });
   }
 };
+
 
 //timeline get
 
