@@ -727,6 +727,8 @@ export const dossiersGet = async (
             title: true,
             title_en: true,
             date: true,
+            description: true,
+            description_en: true,
           },
         },
       },
